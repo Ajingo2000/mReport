@@ -1,10 +1,6 @@
 'use client';
-import { NAVBAR_HEIGHT } from '@/lib/constants'
+
 import React from 'react'
-import Navbar from '@/components/ui/Navbar'
-import { Button } from "@/components/ui/button";
-import { RocketIcon, ShieldCheckIcon, MapIcon } from "lucide-react";
-import { motion } from "framer-motion";
 import HowItWorksSection from './(home)/HowItWorksSection';
 import TestimonialsSection from './(home)/TestimonialsSection';
 import ContactSection from './(home)/ContactSection';
