@@ -31,7 +31,11 @@ const itemVariants = {
 }
 
 const FeaturesSection = () => {
-
+    const icons = [
+        <ShieldCheckIcon key="shield" className="text-blue-500" size={22} />,
+        <RocketIcon key="rocket" className="text-blue-500" size={22} />,
+        <MapIcon key="map" className="text-blue-500" size={22} />
+    ];
     return (
         <motion.div initial="hidden" whileInView={'visible'} viewport={{ once: true }} variants={containerVariants} className='py-24 px-6 sm:px-8 lg:px-12 xl:px-16 bg-gray-50 ' >
             <div className="max-w-4xl xl:maxw-6xl mx-auto">
@@ -43,10 +47,10 @@ const FeaturesSection = () => {
                                 imageSrc={[dashboardImage, mapImage, analyticsImage][index]}
                                 title={['USSD/SMS Reporting', 'Live Maps & Dashboard', 'Report Analysis & Mapping'][index]}
                                 description={["Report incidents instantly without internet access using basic phones.", "Visualize reports and feedback on an interactive real-time map.", "Analyse reports and feedback on insightful charts."][index]}
-                                linkText={[<ShieldCheckIcon className="text-blue-500" size={22} />, <RocketIcon className="text-blue-500 " size={22} />, <MapIcon className="text-blue-500" size={22} />] [index]}
+                                linkText={icons[index]}
                                 linkHref={['/', '/', '/'][index]}
                             />
-                        </motion.div> 
+                        </motion.div>
                     ))}
                 </div>
             </div>
@@ -55,16 +59,16 @@ const FeaturesSection = () => {
 
 }
 
-const FeatureCard = ({imageSrc, title, description, linkText, linkHref }: { imageSrc: string, title: string, description: string,  linkText: string, linkHref: string}) => {
+const FeatureCard = ({ imageSrc, title, description, linkText, linkHref }: { imageSrc: string, title: string, description: string, linkText: string, linkHref: string }) => {
     return (
         <div className="text-center bg-blue-50 rounded-2xl px-10 py-2 shadow hover:shadow-lg transition-all">
             <div className="p-4 mb-4 rounded-lg flex items-center justify-center h-48 w-full">
                 <Image
-                    src={imageSrc}  
+                    src={imageSrc}
                     alt={title}
                     className="h-full w-full object-contain"
                     width={600}
-                    height={600}                    
+                    height={600}
                 />
             </div>
             <h3 className="text-xl font-semibold mb-2">{title}</h3>
