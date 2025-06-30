@@ -31,7 +31,7 @@ export default function TestimonialsSection() {
         {testimonials.map((item, idx) => (
           <div key={idx} className="bg-white p-6 rounded-2xl shadow hover:shadow-md transition">
             <QuoteIcon className="text-blue-500 mb-4" />
-            <p className="italic text-gray-700 mb-4">"{item.quote}"</p>
+            <p className="italic text-gray-700 mb-4">&quot;{item.quote}&quot;</p>
             <p className="text-sm font-medium text-gray-800">- {item.name}, {item.location}</p>
           </div>
         ))}
