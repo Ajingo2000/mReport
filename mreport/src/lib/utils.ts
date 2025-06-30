@@ -2,6 +2,20 @@ import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
 
+
+interface UserObject {
+  userId: string;
+  username: string;
+  [key: string]: unknown;
+}
+interface IdToken {
+  payload?: {
+    email?: string;
+  };
+}
+type FetcherFn = (params: Record<string, unknown>) => Promise<{ error?: boolean }>;
+
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -21,16 +35,13 @@ export function formatPriceValue(value: number | null, isMin: boolean) {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function cleanParams(params: Record<string, any>): Record<string, any> {
+export function cleanParams(params: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
-    Object.entries(params).filter(
-      (
-        [_, value] // eslint-disable-line @typescript-eslint/no-unused-vars
-      ) =>
-        value !== undefined &&
-        value !== "any" &&
-        value !== "" &&
-        (Array.isArray(value) ? value.some((v) => v !== null) : value !== null)
+    Object.entries(params).filter(([_, value]) =>
+      value !== undefined &&
+      value !== "any" &&
+      value !== "" &&
+      (Array.isArray(value) ? value.some((v) => v !== null) : value !== null)
     )
   );
 }
@@ -57,10 +68,10 @@ export const withToast = async <T>(
 };
 
 export const createNewUserInDatabase = async (
-  user: any,
-  idToken: any,
+  user: UserObject,
+  idToken: IdToken,
   userRole: string,
-  fetchWithBQ: any
+  fetchWithBQ: FetcherFn
 ) => {
   const createEndpoint =
     userRole?.toLowerCase() === "manager" ? "/managers" : "/tenants";
