@@ -1,4 +1,5 @@
 'use client';
+import Image from 'next/image'
 
 export default function PartnersSection() {
   const partners = [
@@ -20,7 +21,7 @@ export default function PartnersSection() {
             key={idx}
             className="grayscale hover:grayscale-0 transition duration-300 p-2"
           >
-            <img
+            <Image
               src={partner.logo}
               alt={partner.name}
               className="h-16 object-contain"
