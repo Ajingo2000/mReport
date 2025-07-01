@@ -34,10 +34,10 @@ export function formatPriceValue(value: number | null, isMin: boolean) {
   return isMin ? `$${value}+` : `<$${value}`;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+
 export function cleanParams(params: Record<string, unknown>): Record<string, unknown> {
   return Object.fromEntries(
-    Object.entries(params).filter(([_, value]) =>
+    Object.entries(params).filter(([, value]) =>
       value !== undefined &&
       value !== "any" &&
       value !== "" &&
@@ -45,6 +45,7 @@ export function cleanParams(params: Record<string, unknown>): Record<string, unk
     )
   );
 }
+
 
 type MutationMessages = {
   success?: string;
