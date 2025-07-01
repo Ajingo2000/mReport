@@ -1,24 +1,22 @@
 "use client";
 
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  ReactNode,
-} from "react";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import api from "@/state/api";
 
-// Define expected user structure
+interface AuthContextType {
+  user: any;
+  login: (email: string, password: string) => Promise<void>;
+  signup: (userData: any) => Promise<void>;
+  logout: () => void;
+}
 interface User {
   id: string;
   name: string;
   email: string;
-  [key: string]: unknown; // allows flexibility
+  [key: string]: unknown; // fallback
 }
 
-// Define signup payload structure
 interface SignupData {
   name: string;
   email: string;
@@ -26,47 +24,42 @@ interface SignupData {
   [key: string]: unknown;
 }
 
-// Define context type with specific function signatures
-interface AuthContextType {
-  user: User | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (userData: SignupData) => Promise<void>;
-  logout: () => void;
-}
 
-// Create context
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Custom hook to use auth
 export const useAuth = () => useContext(AuthContext)!;
 
-// Provider component
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null); // use proper typing
   const router = useRouter();
   const pathname = usePathname();
 
-  const isAuthPage =
-    pathname.startsWith("/signin") || pathname.startsWith("/signup");
+  const isAuthPage = pathname.startsWith("/signin") || pathname.startsWith("/signup");
 
-  // Fetch user from API if token exists
+  const logout = () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    setUser(null);
+    router.push("/signin");
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      api
-        .get("/auth/user/")
-        .then((res) => setUser(res.data as User))
+      api.get("/auth/user/")
+        .then((res) => setUser(res.data))
         .catch(() => {
-          logout(); // invalid token
+          logout(); // ✅ now it's defined earlier
         });
     }
-  }, [logout]); // include logout to fix exhaustive-deps warning
+  }, [logout]); // ✅ now this is also valid
 
   const login = async (email: string, password: string): Promise<void> => {
     const res = await api.post("/auth/login/", { email, password });
     localStorage.setItem("access_token", res.data.access);
     localStorage.setItem("refresh_token", res.data.refresh);
-    setUser(res.data.user as User);
+    setUser(res.data.user);
     router.push("/");
   };
 
@@ -74,23 +67,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const res = await api.post("/auth/register/", userData);
     localStorage.setItem("access_token", res.data.access);
     localStorage.setItem("refresh_token", res.data.refresh);
-    setUser(res.data.user as User);
+    setUser(res.data.user);
     router.push("/");
   };
 
-  const logout = (): void => {
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    setUser(null);
-    router.push("/signin");
-  };
-
-  // Redirect logged-in user away from auth pages
   useEffect(() => {
     if (user && isAuthPage) {
       router.push("/");
     }
-  }, [user, isAuthPage, router]);
+  }, [user, isAuthPage]);
 
   return (
     <AuthContext.Provider value={{ user, login, signup, logout }}>
