@@ -15,7 +15,12 @@ export const api = createApi({
       return headers;
     },
   }),
-  endpoints: (_builder) => ({}),
+  endpoints: (builder) => ({
+  ping: builder.query({
+    query: () => '/ping',
+  }),
+}),
+
 });
 
 
