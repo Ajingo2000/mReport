@@ -15,9 +15,7 @@ export const api = createApi({
       return headers;
     },
   }),
-  endpoints: (builder) => ({
-    // add endpoints here
-  }),
+  endpoints: (_builder) => ({}),
 });
 
 
