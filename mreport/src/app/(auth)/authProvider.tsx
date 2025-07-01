@@ -10,6 +10,18 @@ import React, {
 import { useRouter, usePathname } from "next/navigation";
 import api from "@/state/api";
 
+"use client";
+
+import React, {
+  createContext,
+  useState,
+  useEffect,
+  useContext,
+  useCallback,
+} from "react";
+import { useRouter, usePathname } from "next/navigation";
+import api from "@/state/api";
+
 interface User {
   id: string;
   name: string;
@@ -30,6 +42,7 @@ interface AuthContextType {
   signup: (userData: SignupData) => Promise<void>;
   logout: () => void;
 }
+
 
 const AuthContext = createContext<AuthContextType | null>(null);
 export const useAuth = () => useContext(AuthContext)!;
