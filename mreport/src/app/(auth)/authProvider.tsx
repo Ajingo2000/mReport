@@ -10,18 +10,6 @@ import React, {
 import { useRouter, usePathname } from "next/navigation";
 import api from "@/state/api";
 
-"use client";
-
-import React, {
-  createContext,
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-} from "react";
-import { useRouter, usePathname } from "next/navigation";
-import api from "@/state/api";
-
 interface User {
   id: string;
   name: string;
@@ -43,7 +31,6 @@ interface AuthContextType {
   logout: () => void;
 }
 
-
 const AuthContext = createContext<AuthContextType | null>(null);
 export const useAuth = () => useContext(AuthContext)!;
 
@@ -51,9 +38,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   const pathname = usePathname();
-
-  const isAuthPage =
-    pathname.startsWith("/signin") || pathname.startsWith("/signup");
+  const isAuthPage = pathname.startsWith("/signin") || pathname.startsWith("/signup");
 
   const logout = useCallback(() => {
     localStorage.removeItem("access_token");
@@ -65,12 +50,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (token) {
-      api
-        .get("/auth/user/")
+      api.get("/auth/user/")
         .then((res) => setUser(res.data))
-        .catch(() => {
-          logout();
-        });
+        .catch(() => logout());
     }
   }, [logout]);
 
