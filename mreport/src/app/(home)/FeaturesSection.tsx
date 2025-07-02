@@ -59,7 +59,7 @@ const FeaturesSection = () => {
 
 }
 
-const FeatureCard = ({ imageSrc, title, description, linkText, linkHref }: { imageSrc: string, title: string, description: string, linkText: string, linkHref: string }) => {
+const FeatureCard = ({ imageSrc, title, description, linkText, linkHref }: { imageSrc: string, title: string, description: string, linkText: string | React.ReactNode, linkHref: string }) => {
     return (
         <div className="text-center bg-blue-50 rounded-2xl px-10 py-2 shadow hover:shadow-lg transition-all">
             <div className="p-4 mb-4 rounded-lg flex items-center justify-center h-48 w-full">
