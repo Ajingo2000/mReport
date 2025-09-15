@@ -17,7 +17,7 @@ import { apiClient } from '@/lib/api';
 import { Report, User } from '@/types/api'; // Import types
 
 // Base API URL (not needed, apiClient has baseURL)
-const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "https://giraffe-active-forcibly.ngrok-free.app/api";
 
 // Utility function for API calls with mock fallback
 const apiCall = async <T>(endpoint: string): Promise<T> => {

@@ -9,7 +9,7 @@ interface ApiError {
 
 const createApiClient = (getAuth: () => ReturnType<typeof useAuth>) => {
   const api: AxiosInstance = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api/',
+    baseURL: 'https://giraffe-active-forcibly.ngrok-free.app/api/',
     headers: {
       'Content-Type': 'application/json',
     },

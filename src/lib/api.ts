@@ -3,7 +3,7 @@ import { store } from '@/store/store';
 import { refreshToken, logout } from '@/store/slices/authSlice';
 
 // Base API configuration
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+const API_BASE_URL = 'https://giraffe-active-forcibly.ngrok-free.app/api';
 
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
