@@ -22,9 +22,11 @@ export const HeroSection = () => {
               <Button variant="hero" size="lg" className="transition-bounce hover:scale-105">
                 Get Started
               </Button>
+{/* 
               <Button variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10">
                 Learn More
               </Button>
+               */}
             </div>
           </div>
 
