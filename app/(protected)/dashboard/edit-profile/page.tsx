@@ -1,4 +1,6 @@
 'use client';
+
+
 import { useState, useEffect } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
@@ -14,12 +16,15 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/hooks/api/useAuth"; // Import useUserProfile for fetching user data
 import api from "@/lib/api"; // Import api for updates
 
+// ADD THIS LINE — THIS IS THE SOLUTION
+export const dynamic = 'force-dynamic';
+
 const EditProfile = () => {
   const [showActivityFeed, setShowActivityFeed] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  const { data: userData, isLoading: loading, error } = useUserProfile(); // Fetch user profile
+  const { data: userData, isPending: loading, error } = useUserProfile(); // Fetch user profile
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -46,7 +51,7 @@ const EditProfile = () => {
         role: userData.role || "",
         location: "",
         bio: "",
-        avatar: userData.avatar || "",
+        avatar: userData.profile_picture || "",
         category: "", // Fetch if responder
       });
 

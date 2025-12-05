@@ -1,3 +1,5 @@
+'use client'
+
 import { useState, useEffect } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
@@ -7,6 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Check, Crown, Zap, Shield, Star, ArrowRight, Users, BarChart3, MapPin, Headphones } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+
+// ADD THIS LINE — THIS IS THE SOLUTION
+export const dynamic = 'force-dynamic';
 
 const UpgradePlan = () => {
   const [showActivityFeed, setShowActivityFeed] = useState(false);

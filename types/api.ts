@@ -1,152 +1,129 @@
-// Updated: src/types/api.ts
-// Changes:
-// 1. Adjusted role to lowercase 'citizen' | 'responder' | 'admin' to match backend values.
-// 2. Removed fields not present in backend CustomUser: phone, organization, location, bio, avatar (can add to models if needed).
-// 3. Kept first_name, last_name as optional (from AbstractUser).
-// 4. For ResponderDetails, adjusted to match backend: added category instead of specialization (array), removed response_rating, total_responses (not in backend).
-// 5. No changes to other types like Report, etc., as they seem aligned.
-// 6. In SignupRequest, updated role choices to lowercase.
-// 7. In UpdateProfileRequest, removed fields not in backend serializer: phone, organization, location, bio, subscriptions (wait, subscriptions is there), added first_name, last_name.
+// src/types/api.ts
+// mReport — Focused on SRHR & GBV Reporting (South Sudan)
 
-// API Types for mReport Dashboard
+export type ReportStatus = 'pending' | 'in_progress' | 'resolved' | 'closed';
+export type ReportPriority = 'low' | 'medium' | 'high' | 'critical';
+
+// Main report categories — we only care about these two
+export type ReportType = 'srhr' | 'gbv';
+
+
+// Subtypes for SRHR
+export type SRHRSubtype =
+  | 'maternal_health'
+  | 'contraceptive'
+  | 'hiv'
+  | 'family_planning'
+  | 'other_srhr';
+
+// Subtypes for GBV
+export type GBVSubtype =
+  | 'physical_violence'
+  | 'sexual_violence'
+  | 'emotional_abuse'
+  | 'economic_violence'
+  | 'fgm'
+  | 'child_marriage'
+  | 'other_gbv';
+
+export type ReportSubtype = SRHRSubtype | GBVSubtype;
+
+// User roles
+export type UserRole = 'user' | 'responder' | 'admin';
+
+// Subscription filter used in dashboards
+export type SubscriptionFilter = 'All' | 'SRHR' | 'GBV';
+// In src/types/api.ts
+export type SubscriptionType = 'srhr' | 'gbv' | 'All';
+
+
+// Main User type from backend
 export interface User {
-  id: number;
-  username: string;
+  id: string;
   email: string;
-  role: 'citizen' | 'responder' | 'admin';
-  subscriptions: string[];
   first_name?: string;
   last_name?: string;
+  role: UserRole;
+  organization?: string | null;
+  email_verified: boolean;
+  subscriptions: ('srhr' | 'gbv')[];
+  profile_picture?: string | null;
   created_at: string;
-  updated_at: string;
+
+  // Notification & privacy settings
+  email_notifications?: boolean;
+  sms_notifications?: boolean;
+  report_updates?: boolean;
+  system_alerts?: boolean;
+  language?: string;
+  timezone?: string;
+  two_factor_auth?: boolean;
+  data_sharing?: boolean;
 }
 
-export interface ResponderDetails {
-  id: number;
-  user: number;
-  category: string;  // 'damage' | 'assistance' | 'srhr'
+
+// Responder details (for assigned cases)
+export interface Responder {
+  id: string;
+  user: User;
+  category: 'srhr' | 'gbv' | 'both';
   phone_number?: string;
   is_active: boolean;
-  // Removed: specialization, status, response_rating, total_responses (not in backend)
 }
 
+// Core Report type — only fields we actually use
 export interface Report {
-  id: number;
+  report_id: string;
   title: string;
   description: string;
-  type: 'Infrastructure' | 'Emergency' | 'Health' | 'Education' | 'SRHR';
-  subtype: string;
-  status: 'pending' | 'in_progress' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high' | 'critical';
+  report_type: ReportType;
+  subtype: ReportSubtype;
+  status: ReportStatus;
+  priority: ReportPriority;
   latitude: number;
   longitude: number;
-  address: string;
+  location: string;
+  phone_number?: string;
   images: string[];
   reporter: User;
-  assigned_responder?: ResponderDetails;
+  assigned_responder?: Responder;
   created_at: string;
   updated_at: string;
-  resolved_at?: string;
+  resolved_at?: string | null;
 }
 
-export interface ReportCounts {
-  Infrastructure: number;
-  Emergency: number;
-  Health: number;
-  Education: number;
-  SRHR: number;
+// Stats & Counts
+export interface ReportStats {
+  total: number;
+  pending: number;
+  in_progress: number;
+  resolved: number;
+  critical: number;
 }
 
-export interface DamageCounts {
-  [key: string]: number;
+export interface SRHRStats {
+  maternal_health: number;
+  contraceptive: number;
+  hiv: number;
+  family_planning: number;
+  other_srhr: number;
 }
 
-export interface AssistanceCounts {
-  [key: string]: number;
+export interface GBVStats {
+  physical_violence: number;
+  sexual_violence: number;
+  emotional_abuse: number;
+  economic_violence: number;
+  fgm: number;
+  child_marriage: number;
+  other_gbv: number;
 }
 
-export interface SRHRCounts {
-  [key: string]: number;
-}
-
-export interface Feedback {
-  id: number;
-  report: number;
-  user: number;
-  satisfaction_score: 1 | 2 | 3 | 4 | 5;
-  comments: string;
-  created_at: string;
-}
-
-export interface SupportTicket {
-  id: number;
-  user: number;
-  subject: string;
-  message: string;
-  status: 'open' | 'in_progress' | 'resolved' | 'closed';
-  priority: 'low' | 'medium' | 'high';
-  created_at: string;
-  updated_at: string;
-  admin_response?: string;
-  admin_response_date?: string;
-}
-
-export interface AuthTokens {
-  access: string;
-  refresh: string;
-}
-
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface SignupRequest {
-  username: string;
-  email: string;
-  password: string;
-  role: 'citizen' | 'responder' | 'admin';
-  subscriptions: string[];
-  first_name?: string;
-  last_name?: string;
-}
-
-export interface UpdateProfileRequest {
-  username?: string;
-  email?: string;
-  first_name?: string;
-  last_name?: string;
-  subscriptions?: string[];
-}
-
-export interface CreateReportRequest {
-  title: string;
-  description: string;
-  type: 'Infrastructure' | 'Emergency' | 'Health' | 'Education' | 'SRHR';
-  subtype: string;
-  latitude: number;
-  longitude: number;
-  address: string;
-  images?: File[];
-  priority?: 'low' | 'medium' | 'high' | 'critical';
-}
-
-export interface CreateFeedbackRequest {
-  report: number;
-  satisfaction_score: 1 | 2 | 3 | 4 | 5;
-  comments: string;
-}
-
-export interface CreateSupportTicketRequest {
-  subject: string;
-  message: string;
-  priority?: 'low' | 'medium' | 'high';
-}
-
+// API Responses
 export interface ApiResponse<T> {
+  success: boolean;
   data: T;
   message?: string;
-  status: 'success' | 'error';
 }
 
 export interface PaginatedResponse<T> {
@@ -154,4 +131,145 @@ export interface PaginatedResponse<T> {
   next: string | null;
   previous: string | null;
   results: T[];
+}
+
+// Auth tokens
+export interface AuthTokens {
+  access: string;
+  refresh: string;
+}
+
+// Request payload for creating a new report (SRHR & GBV focused)
+export interface CreateReportRequest {
+  title: string;
+  description: string;
+  report_type: 'srhr' | 'gbv';
+  subtype: ReportSubtype;
+  latitude: number;
+  longitude: number;
+  location: string;
+  phone_number?: string;
+  priority?: ReportPriority;
+  images?: File[];
+}
+
+// Add these to the end of src/types/api.ts
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface SignupRequest {
+  first_name: string;
+  last_name: string;
+  email: string;
+  password: string;
+  password2: string;
+}
+
+
+// Add this at the end of src/types/api.ts
+
+export interface CreateFeedbackRequest {
+  rating: number;
+  message: string;
+  page?: string;
+}
+
+export interface Feedback extends CreateFeedbackRequest {
+  id: string;
+  user: User;
+  created_at: string;
+}
+
+// ──────────────────────────────────────────────
+// Responder & Profile Update Types
+// ──────────────────────────────────────────────
+export interface ResponderDetails {
+  id: string;
+  category: 'srhr' | 'gbv' | 'both';
+  phone_number?: string | null;
+  is_active: boolean;
+  user: User;
+}
+
+export interface UpdateProfileRequest {
+  first_name?: string;
+  last_name?: string;
+  phone_number?: string;
+  category?: 'srhr' | 'gbv' | 'both';
+  profile_picture?: File | string | null;
+}
+
+// ──────────────────────────────────────────────
+// Dashboard Stats & Counts
+// ──────────────────────────────────────────────
+export interface ReportCounts {
+  total: number;
+  pending: number;
+  in_progress: number;
+  resolved: number;
+  critical: number;
+}
+
+export interface DamageCounts {
+  minor: number;
+  moderate: number;
+  severe: number;
+  destroyed: number;
+}
+
+export interface AssistanceCounts {
+  medical: number;
+  shelter: number;
+  food: number;
+  psychological: number;
+}
+
+export interface SRHRCounts {
+  maternal_health: number;
+  contraceptive: number;
+  hiv: number;
+  family_planning: number;
+  other_srhr: number;
+}
+
+export interface GBVCounts {
+  physical_violence: number;
+  sexual_violence: number;
+  emotional_abuse: number;
+  economic_violence: number;
+  fgm: number;
+  child_marriage: number;
+  other_gbv: number;
+}
+
+// ──────────────────────────────────────────────
+// Support Tickets — for user support system
+// ──────────────────────────────────────────────
+export interface CreateSupportTicketRequest {
+  subject: string;
+  message: string;
+  priority?: 'low' | 'medium' | 'high' | 'urgent';
+  category?: 'bug' | 'feature' | 'account' | 'other';
+}
+
+export interface SupportTicket extends CreateSupportTicketRequest {
+  id: string;
+  ticket_id: string;
+  user: User;
+  status: 'open' | 'in_progress' | 'resolved' | 'closed';
+  created_at: string;
+  updated_at: string;
+  assigned_to?: User | null;
+  replies?: SupportTicketReply[];
+}
+
+export interface SupportTicketReply {
+  id: string;
+  message: string;
+  sender: User;
+  created_at: string;
+  is_staff: boolean;
 }

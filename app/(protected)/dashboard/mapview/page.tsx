@@ -11,6 +11,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { MapPin, Filter, Navigation, Layers, CalendarRange, Download, LocateFixed, RefreshCcw, Search } from "lucide-react";
 import useSWR from "swr";
+import { useAuth } from "@/contexts/AuthContext";
+
 import {
   Source,
   Layer,
@@ -30,11 +32,14 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { CSVLink } from "react-csv";
-
+import Cookies from "js-cookie";
 import ReportFilter from "@/components/ReportFilter"; // Updated import for ReportFilter
 import ReportNotifications from "@/components/ReportNotifications"; // Import for ReportNotifications
 import { FiAlertCircle } from "react-icons/fi";
 import mapboxgl from "mapbox-gl";
+
+// ADD THIS LINE — THIS IS THE SOLUTION
+export const dynamic = 'force-dynamic';
 
 mapboxgl.workerUrl = new URL(
   "mapbox-gl/dist/mapbox-gl-csp-worker.js",
@@ -42,17 +47,18 @@ mapboxgl.workerUrl = new URL(
 ).href;
 
 // Utilities
-const fetcher = (url) =>
+const fetcher = (url: string): Promise<any> =>
   fetch(url, { credentials: "include" }).then((r) => {
     if (!r.ok) throw new Error(`Request failed ${r.status}`);
     return r.json();
   });
 
-function classNames(...s) {
+function classNames(...s: (string | boolean | null | undefined)[]) {
   return s.filter(Boolean).join(" ");
 }
 
-function toGeoJSON(features) {
+
+function toGeoJSON(features: any[]) {
   return {
     type: "FeatureCollection",
     features: features
@@ -80,16 +86,17 @@ function toGeoJSON(features) {
   };
 }
 
-function debounce(fn, wait = 400) {
-  let t;
-  return (...args) => {
+function debounce<T extends (...args: any[]) => void>(fn: T, wait = 400): T {
+  let t: NodeJS.Timeout;
+  return ((...args: Parameters<T>) => {
     clearTimeout(t);
     t = setTimeout(() => fn(...args), wait);
-  };
+  }) as T;
 }
 
-function toCSVData(reports) {
-  return reports.map((r) => ({
+
+function toCSVData(reports: any[]) {
+  return reports.map((r: any) => ({
     ID: r.report_id,
     Type: r.report_type,
     Subtype: r.damage_type || r.assistance_type || r.srhr_type || "other",
@@ -263,50 +270,44 @@ const userLocationLayer = {
   },
 };
 
-// Stub useUser - implement with auth/localStorage
-const useUser = () => {
-  const [user, setUser] = useState<{ subscriptions: string[] } | null>(null);
-  useEffect(() => {
-    const storedUser = localStorage.getItem("mreport_user");
-    if (storedUser) setUser(JSON.parse(storedUser));
-  }, []);
-  return user;
-};
+
 
 const MapView = () => {
-  const mapRef = useRef(null);
-  const [hoveredStateId, setHoveredStateId] = useState(null);
-  const [selectedStateId, setSelectedStateId] = useState(null);
-  const itemRefs = useRef(new Map());
-  const [userLocation, setUserLocation] = useState(null);
-  const [pulseTimestamps, setPulseTimestamps] = useState(new Map());
+  const mapRef = useRef<any>(null);
+  const [hoveredStateId, setHoveredStateId] = useState<string | null>(null);
+  const [selectedStateId, setSelectedStateId] = useState<string | null>(null);
+  const itemRefs = useRef<Map<string, HTMLElement>>(new Map());
+  const [userLocation, setUserLocation] = useState<any>(null);
+  const [pulseTimestamps, setPulseTimestamps] = useState<Map<string, Date>>(new Map());
   const [pulseFrame, setPulseFrame] = useState(0);
   const [showPanel, setShowPanel] = useState(true);
-  const [typeFilter, setTypeFilter] = useState(null);
-  const [statusFilter, setStatusFilter] = useState(null);
-  const [subtypeFilter, setSubtypeFilter] = useState([]);
+  const [typeFilter, setTypeFilter] = useState<string[] | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string[] | null>(null);
+  const [subtypeFilter, setSubtypeFilter] = useState<string[]>([]);
   const [heatmapOn, setHeatmapOn] = useState(false);
   const [query, setQuery] = useState("");
-  const [dateFrom, setDateFrom] = useState(null);
-  const [dateTo, setDateTo] = useState(null);
+  const [dateFrom, setDateFrom] = useState<string | null>(null);
+  const [dateTo, setDateTo] = useState<string | null>(null);
+  const [selected, setSelected] = useState<any>(null);
   const [filterCriteria, setFilterCriteria] = useState({
     reportType: "",
     status: "",
   });
-  const [selected, setSelected] = useState(null);
 
-  const user = useUser();  // Get subscriptions
-  const subscriptions = user?.subscriptions || [];  // Filter to these types
+// Inside your component:
+const { user, loading: authLoading } = useAuth();
+const subscriptions = user?.subscriptions || [];
 
-  const apiUrl = process.env.NEXT_APP_API_URL;
+// Optional: show loading state
+if (authLoading) {
+  return <div>Loading user...</div>;
+}
 
-  const {
-    data: reportsData,
-    error: reportsError,
-    isLoading: isReportsLoading,
-  } = useSWR(`${apiUrl}csReports/`, fetcher, {
-    refreshInterval: 15000,
-  });
+  const { data: reportsData, error: reportsError, isLoading: isReportsLoading } = useSWR<any[]>(
+      "csReports/",
+      fetcher,
+      { refreshInterval: 15000 }
+    );
 
   useEffect(() => {
     document.title = "Map View - mReport | Geographic Report Visualization";
@@ -323,7 +324,7 @@ const MapView = () => {
       const lng = pos.coords.longitude;
       let place_name = "Your Location";
       try {
-        const res = await fetch(`${apiUrl}user-location/?lat=${lat}&lon=${lng}`);
+        const res = await fetch(`user-location/?lat=${lat}&lon=${lng}`);
         if (res.ok) {
           const data = await res.json();
           place_name = data.place_name || place_name;
@@ -332,7 +333,7 @@ const MapView = () => {
       setUserLocation({ lat, lng, place_name });
       mapRef.current?.flyTo({ center: [lng, lat], zoom: 12, duration: 2000 });
     });
-  }, [userLocation, apiUrl]);
+  }, [userLocation]);
 
   useEffect(() => {
     if (!reportsData || !Array.isArray(reportsData)) return;
@@ -468,7 +469,7 @@ const MapView = () => {
     reportsData.forEach((report) => {
       const pulseStart = pulseTimestamps.get(report.report_id);
       if (pulseStart) {
-        const timeDiff = (now - new Date(pulseStart)) / 1000;
+        const timeDiff = pulseStart ? (now.getTime() - pulseStart.getTime()) / 1000 : 999;
         if (timeDiff <= 30) {
           map.setFeatureState(
             { source: "reports", id: report.report_id },
@@ -488,8 +489,8 @@ const MapView = () => {
     const map = mapRef.current?.getMap();
     if (!map) return;
 
-    let currentHoveredStateId = null;
-    map.on("mousemove", "unclustered-point", (e) => {
+    let currentHoveredStateId: number | null = null;
+    map.on("mousemove", "unclustered-point", (e: mapboxgl.MapMouseEvent & { features?: any[] }) => {
       if (e.features && e.features.length > 0) {
         const feature = e.features[0];
         const id = feature.id;
@@ -514,11 +515,11 @@ const MapView = () => {
       setHoveredStateId(null);
     });
 
-    map.on("click", "clusters", (e) => {
+    map.on("click", "clusters", (e:any) => {
       const features = map.queryRenderedFeatures(e.point, { layers: ["clusters"] });
       const clusterId = features[0].properties.cluster_id;
 
-      map.getSource("reports").getClusterExpansionZoom(clusterId, (err, zoom) => {
+      map.getSource("reports").getClusterExpansionZoom(clusterId, (err: any, zoom: number) => {
         if (err) return;
         map.easeTo({
           center: features[0].geometry.coordinates,
@@ -531,7 +532,7 @@ const MapView = () => {
     updatePulseStates();
   };
 
-  const onMapClick = (e) => {
+  const onMapClick = (e: mapboxgl.MapMouseEvent & { features?: any[] }) => {
     const map = mapRef.current?.getMap();
     if (!map) return;
     const features = map.queryRenderedFeatures(e.point, { layers: ["clusters", "unclustered-point"] });
@@ -560,13 +561,13 @@ const MapView = () => {
     return () => clearTimeout(t);
   }, [hoveredStateId]);
 
-  const handleFilterChange = (criteria) => {
+  const handleFilterChange = (criteria: { reportType: string; status: string }) => {
     setFilterCriteria(criteria);
     setTypeFilter(criteria.reportType ? [criteria.reportType] : null);
     setStatusFilter(criteria.status ? [criteria.status] : null);
   };
 
-  const handleReportClick = (report) => {
+  const handleReportClick = (report:any) => {
     const lat = parseFloat(report.latitude);
     const lon = parseFloat(report.longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
@@ -590,7 +591,7 @@ const MapView = () => {
     });
   };
 
-  const getStatusBadgeVariant = (status) => {
+  const getStatusBadgeVariant = (status:string) => {
     switch (status) {
       case "Critical": return "destructive";
       case "Pending": return "default";
@@ -600,7 +601,7 @@ const MapView = () => {
     }
   };
 
-  const getBgColor = (report_type) => {
+  const getBgColor = (report_type:string) => {
     let bgColor;
     if (report_type === "damage") bgColor = "border-red-500";
     else if (report_type === "assistance") bgColor = "border-green-400";
@@ -766,7 +767,7 @@ const MapView = () => {
                                     const lng = pos.coords.longitude;
                                     let place_name = "Your Location";
                                     try {
-                                      const res = await fetch(`${apiUrl}user-location/?lat=${lat}&lon=${lng}`);
+                                      const res = await fetch(`api/user-location/?lat=${lat}&lon=${lng}`);
                                       if (res.ok) {
                                         const data = await res.json();
                                         place_name = data.place_name || place_name;
@@ -808,7 +809,7 @@ const MapView = () => {
                             {mapped.map((report) => (
                               <li
                                 key={report.report_id}
-                                ref={(el) => itemRefs.current.set(report.report_id, el)}
+                                ref={(el) => { if (el) itemRefs.current.set(report.report_id, el); }}                             
                                 className={classNames(
                                   "p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-smooth cursor-pointer",
                                   getBgColor(report.report_type),
@@ -846,7 +847,7 @@ const MapView = () => {
                             {unmapped.map((report) => (
                               <li
                                 key={report.report_id}
-                                ref={(el) => itemRefs.current.set(report.report_id, el)}
+                                ref={(el) => { if (el) itemRefs.current.set(report.report_id, el); }}
                                 className={classNames(
                                   "p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-smooth cursor-pointer",
                                   getBgColor(report.report_type),
@@ -919,16 +920,16 @@ const MapView = () => {
                       clusterMaxZoom={14}
                       clusterRadius={50}
                     >
-                      {heatmapOn && <Layer {...heatmapLayer} />}
-                      <Layer {...clusterLayer} />
-                      <Layer {...clusterCountLayer} />
-                      <Layer {...pulseLayer} />
-                      {!heatmapOn && <Layer {...unclusteredLayer} />}
-                    </Source>
-
-                    {userGeojson && (
-                      <Source id="user-location" type="geojson" data={userGeojson}>
-                        <Layer {...userLocationLayer} />
+                     {heatmapOn && <Layer {...(heatmapLayer as any)} />}
+                                           <Layer {...(clusterLayer as any)} />
+                                           <Layer {...(clusterCountLayer as any)} />
+                                           <Layer {...(pulseLayer as any)} />
+                                           {!heatmapOn && <Layer {...(unclusteredLayer as any)} />}
+                                         </Source>
+                     
+                                         {userGeojson && (
+                                           <Source id="user-location" type="geojson" data={userGeojson}>
+                                             <Layer {...(userLocationLayer as any)} />
                       </Source>
                     )}
 

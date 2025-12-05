@@ -1,11 +1,13 @@
+// store/slices/authSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { User, AuthTokens, LoginRequest, SignupRequest, SubscriptionType } from '@/types/api';
-import api  from '@/lib/api';
-
+import { User, AuthTokens, LoginRequest, SignupRequest } from '@/types/api';
+import { SubscriptionType } from '@/types/api';
+import api from '@/lib/api';
+import Cookies from 'js-cookie';
+import { ACCESS_TOKEN } from '@/constants';
 
 interface AuthState {
   user: User | null;
-  tokens: AuthTokens | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -14,9 +16,8 @@ interface AuthState {
 
 const initialState: AuthState = {
   user: null,
-  tokens: JSON.parse(localStorage.getItem('mreport_tokens') || 'null'),
-  isAuthenticated: !!localStorage.getItem('mreport_tokens'),
-  isLoading: false,
+  isAuthenticated: false,
+  isLoading: true, // Start as loading to check auth
   error: null,
   currentSubscription: 'All',
 };
@@ -27,15 +28,10 @@ export const loginUser = createAsyncThunk(
   async (credentials: LoginRequest, { rejectWithValue }) => {
     try {
       const response = await api.post('/auth/login/', credentials);
-      const tokens = response.data;
-      localStorage.setItem('mreport_tokens', JSON.stringify(tokens));
-      
-      // Fetch user details after successful login
-      const userResponse = await api.get('/user-details/', {
-        headers: { Authorization: `Bearer ${tokens.access}` }
-      });
-      
-      return { tokens, user: userResponse.data };
+      const { user } = response.data;
+
+      // Cookies are set by backend (httpOnly) — we just return user
+      return { user };
     } catch (error: any) {
       return rejectWithValue(error.response?.data?.message || 'Login failed');
     }
@@ -43,82 +39,56 @@ export const loginUser = createAsyncThunk(
 );
 
 export const signupUser = createAsyncThunk(
-  'auth/signup',
-  async (userData: SignupRequest, { rejectWithValue }) => {
-    try {
-      const response = await api.post('/auth/signup/', userData);
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Signup failed');
-    }
-  }
-);
-
-export const refreshToken = createAsyncThunk(
-  'auth/refresh',
-  async (_, { getState, rejectWithValue }) => {
-    try {
-      const { auth } = getState() as { auth: AuthState };
-      if (!auth.tokens?.refresh) {
-        throw new Error('No refresh token available');
-      }
-      
-      const response = await api.post('/login/refresh/', {
-        refresh: auth.tokens.refresh
-      });
-      
-      const newTokens = response.data;
-      localStorage.setItem('mreport_tokens', JSON.stringify(newTokens));
-      
-      return newTokens;
-    } catch (error: any) {
-      localStorage.removeItem('mreport_tokens');
-      return rejectWithValue(error.response?.data?.message || 'Token refresh failed');
-    }
-  }
-);
+   'auth/register',
+   async (data: SignupRequest, { rejectWithValue }) => {
+     try {
+       const res = await api.post('/auth/register/', data);
+       return res.data;
+     } catch (error: any) {
+       return rejectWithValue(error.response?.data);
+     }
+   }
+ );
 
 export const fetchUserProfile = createAsyncThunk(
   'auth/fetchProfile',
-  async (_, { getState, rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const { auth } = getState() as { auth: AuthState };
-      if (!auth.tokens?.access) {
-        throw new Error('No access token available');
-      }
-      
-      const response = await api.get('/user-details/', {
-        headers: { Authorization: `Bearer ${auth.tokens.access}` }
-      });
-      
+      const response = await api.get<User>('/auth/profile/');
       return response.data;
     } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch profile');
+      // If 401, user is not authenticated
+      return rejectWithValue('Unauthorized');
     }
   }
 );
+
+export const logoutUser = createAsyncThunk('auth/logout', async () => {
+  await api.post('/auth/logout/', {});
+  // Cookies will be cleared by backend
+});
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+    setCurrentSubscription: (state, action: PayloadAction<SubscriptionType>) => {
+      state.currentSubscription = action.payload;
+    },
+    // ADD THESE TWO BACK:
     logout: (state) => {
       state.user = null;
-      state.tokens = null;
       state.isAuthenticated = false;
-      state.error = null;
-      localStorage.removeItem('mreport_tokens');
-    },
-    clearError: (state) => {
+      state.currentSubscription = 'All';
       state.error = null;
     },
     updateUser: (state, action: PayloadAction<Partial<User>>) => {
       if (state.user) {
         state.user = { ...state.user, ...action.payload };
       }
-    },
-    setCurrentSubscription: (state, action: PayloadAction<SubscriptionType>) => {
-      state.currentSubscription = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -130,48 +100,57 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.tokens = action.payload.tokens;
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.error = null;
-        // Set default subscription based on user's first subscription
+
+        // Set default subscription
         if (action.payload.user.subscriptions.length > 0) {
           state.currentSubscription = action.payload.user.subscriptions[0];
         }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload as string;
         state.isAuthenticated = false;
-      })
-      // Signup
-      .addCase(signupUser.pending, (state) => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(signupUser.fulfilled, (state) => {
-        state.isLoading = false;
-        state.error = null;
-      })
-      .addCase(signupUser.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.payload as string;
-      })
-      // Refresh token
-      .addCase(refreshToken.fulfilled, (state, action) => {
-        state.tokens = action.payload;
-      })
-      .addCase(refreshToken.rejected, (state) => {
         state.user = null;
-        state.tokens = null;
-        state.isAuthenticated = false;
+        state.error = action.payload as string;
       })
-      // Fetch profile
+
+      // Fetch Profile (on app load)
+      .addCase(fetchUserProfile.pending, (state) => {
+        state.isLoading = true;
+      })
       .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.isLoading = false;
         state.user = action.payload;
+        state.isAuthenticated = true;
+
+        if (action.payload.subscriptions.length > 0) {
+          state.currentSubscription = action.payload.subscriptions[0];
+        }
+      })
+      .addCase(fetchUserProfile.rejected, (state) => {
+        state.isLoading = false;
+        state.isAuthenticated = false;
+        state.user = null;
+      })
+
+      // Logout
+      .addCase(logoutUser.fulfilled, (state) => {
+        state.user = null;
+        state.isAuthenticated = false;
+        state.currentSubscription = 'All';
       });
   },
 });
 
-export const { logout, clearError, updateUser, setCurrentSubscription } = authSlice.actions;
+
+export const {
+  clearError,
+  setCurrentSubscription,
+  logout,
+  updateUser
+} = authSlice.actions;
+
 export default authSlice.reducer;
+

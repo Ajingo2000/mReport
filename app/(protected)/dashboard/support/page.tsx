@@ -14,6 +14,9 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { HelpCircle, Send, MessageCircle, Phone, Mail, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+// ADD THIS LINE — THIS IS THE SOLUTION
+export const dynamic = 'force-dynamic';
+
 const Support = () => {
   const [showActivityFeed, setShowActivityFeed] = useState(false);
   const { toast } = useToast();

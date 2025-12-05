@@ -1,10 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  webpack(config) {
-    config.resolve.fallback = { fs: false };
-    return config;
+  images: {
+    disableStaticImages: true,
+    unoptimized: true
   },
+  experimental: {
+    optimizePackageImports: []
+  }
 };
 
 export default nextConfig;

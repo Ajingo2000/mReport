@@ -11,7 +11,6 @@ import { Eye, EyeOff } from "lucide-react";
 import { AuthService } from "@/lib/services";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
-import myLogo from "@/public/images/favicon.png";
 
 
 
@@ -24,7 +23,7 @@ const Login = () => {
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, setIsLoading] = useState(false);
 
   useEffect(() => {
     document.title = "Login - mReport | Secure Access to Dashboard";
@@ -35,7 +34,7 @@ const Login = () => {
   // ================================
 
   const handleGoogleSignIn = () => {
-  window.location.href = `http://127.0.0.1:8000/accounts/google/login/`;
+  window.location.href = `https://api.mreport.org/accounts/google/login/`;
 };
 
 
@@ -120,11 +119,15 @@ const Login = () => {
           {/* Logo */}
           <div className="flex items-center gap-2">
             <div className=" flex items-center justify-center">
-              <Image
-                src={myLogo}
-                alt="Mreport Logo"
-                className="w-20 h-20 lg:w-32 lg:h-32"
-              />
+            	<Link href="/">
+	              <Image
+	                src="/images/favicon.png"
+	                width={128}
+	                height={128}
+	                alt="Mreport Logo"
+	                className="w-20 h-20 lg:w-32 lg:h-32"
+	              />
+	           </Link>
             </div>
           </div>
 
@@ -221,13 +224,13 @@ const Login = () => {
             </div>
 
             {/* Login Button */}
-            <Button
+            <button
               type="submit"
-              className="w-full h-12 text-base"
-              disabled={isLoading}
+              className="w-full h-12 text-white bg-orange-600 rounded-lg"
+              disabled={isPending}
             >
-              {isLoading ? "Signing In..." : "Log In"}
-            </Button>
+              {isPending ? "Signing In..." : "Log In"}
+            </button>
           </form>
 
           {/* Divider */}
@@ -243,10 +246,9 @@ const Login = () => {
           </div>
 
           {/* Google Button */}
-          <Button
+          <button
             type="button"
-            variant="outline"
-            className="w-full h-12 border-orange-300 text-orange-700 hover:bg-orange-50 font-medium"
+            className="w-full h-12 border-orange-300 text-orange-700 hover:bg-orange-50 font-medium "
             onClick={handleGoogleSignIn}
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -256,7 +258,7 @@ const Login = () => {
               <path fill="#4285F4" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
             </svg>
             Continue with Google
-          </Button>
+          </button>
 
           <p className="text-center text-gray-600">
             Don't have an account?{" "}

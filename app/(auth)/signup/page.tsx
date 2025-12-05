@@ -3,31 +3,31 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { AuthService } from '@/lib/services';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Lock, Mail, User, Eye, EyeOff } from 'lucide-react';
+import { Lock, Mail, User, Users, Eye, EyeOff } from 'lucide-react';
 import { FiCheck } from 'react-icons/fi';
 import Image from 'next/image';
-import registerIllustration from '@/public/images/registerIllustration.png';
-import myLogo from "@/public/images/favicon.png";
 
 const RegisterPage: React.FC = () => {
-  // ------------------- Functional Logic (Unchanged) -------------------
+  // ------------------- Form State -------------------
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     password2: '',
     first_name: '',
     last_name: '',
+    organization_name: '',
   });
 
+  // ------------------- Errors & UI State -------------------
   interface Errors {
     email?: string;
     password?: string;
     password2?: string;
     first_name?: string;
     last_name?: string;
+    organization_name?: string;
     general?: string;
   }
 
@@ -36,29 +36,31 @@ const RegisterPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [returnEmail, setReturnEmail] = useState('');
 
-  // 🔒 Show/hide password toggles
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // ------------------- Handlers -------------------
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error when user starts typing
     if (errors[name as keyof Errors]) {
-      setErrors(prev => ({ ...prev, [name as keyof Errors]: '' }));
+      setErrors(prev => ({ ...prev, [name as keyof Errors]: undefined }));
     }
   };
 
-  const validate = () => {
+  const validate = (): boolean => {
     const newErrors: Errors = {};
+
     if (!formData.first_name.trim()) newErrors.first_name = 'First name is required';
     if (!formData.last_name.trim()) newErrors.last_name = 'Last name is required';
+    if (!formData.organization_name.trim()) newErrors.organization_name = 'Organization name is required';
     if (!formData.email.trim()) newErrors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
     if (!formData.password) newErrors.password = 'Password is required';
-    else if (formData.password.length < 8)
-      newErrors.password = 'Password must be at least 8 characters';
-    if (formData.password !== formData.password2)
-      newErrors.password2 = 'Passwords do not match';
+    else if (formData.password.length < 8) newErrors.password = 'Password must be at least 8 characters';
+    if (formData.password !== formData.password2) newErrors.password2 = 'Passwords do not match';
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -68,22 +70,18 @@ const RegisterPage: React.FC = () => {
     if (!validate()) return;
 
     setIsLoading(true);
+    setErrors({});
+
     try {
       const res = await AuthService.register(formData);
-      if (res) {
+      if (res && res.email) {
         setReturnEmail(res.email);
         setSuccess(true);
-        setFormData({
-          email: '',
-          password: '',
-          password2: '',
-          first_name: '',
-          last_name: '',
-        });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Registration failed:', error);
-      setErrors({ general: 'Registration failed. Please try again.' });
+      const message = error.response?.data?.error || error.message || 'Registration failed. Please try again.';
+      setErrors({ general: message });
     } finally {
       setIsLoading(false);
     }
@@ -93,126 +91,143 @@ const RegisterPage: React.FC = () => {
     document.title = 'Register - mReport | Join the Humanitarian Response Network';
   }, []);
 
-  // ------------------- Success Message -------------------
+  // ------------------- Success Screen -------------------
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-bl from-indigo-50 via-sky-100 to-blue-200 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-md max-w-md w-full text-center">
-          <div className="flex justify-center mb-4">
-            <FiCheck className="text-green-500 text-4xl font-black" />
+      <div className="min-h-screen bg-gradient-to-bl from-indigo-50 via-sky-100 to-blue-200 flex items-center justify-center p-4">
+        <div className="bg-white p-10 rounded-xl shadow-lg max-w-md w-full text-center">
+          <div className="flex justify-center mb-6">
+            <div className="bg-green-100 p-4 rounded-full">
+              <FiCheck className="text-green-600 text-5xl" />
+            </div>
           </div>
-          <h2 className="text-2xl font-bold text-neutral-800">Registration Successful</h2>
-          <p className="text-gray-600 mt-2 mb-5">
-            Please check your email for verification instructions.
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">You're Almost There!</h2>
+          <p className="text-gray-700 text-lg mb-3">
+            A verification email has been sent to:
           </p>
-          <span className="text-neutral-800 font-semibold text-sm">
-            If you don’t see the email, please check your spam folder.
-          </span>
+          <p className="text-xl font-semibold text-blue-600 mb-6">{returnEmail}</p>
+          <p className="text-gray-600">
+            Please check your inbox (and spam folder) and click the link to activate your account.
+          </p>
+          <p className="text-sm text-gray-500 mt-6">
+            You’ll be automatically logged in after verification.
+          </p>
         </div>
       </div>
     );
   }
 
-  // ------------------- Styled UI (Theme Matched with Login) -------------------
+  // ------------------- Registration Form -------------------
   return (
     <div className="min-h-screen flex">
-      {/* Left Side: Registration Form */}
+      {/* Left Side: Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center justify-center">
+          <div className="flex justify-center">
+            <Link href="/">
               <Image
-                src={myLogo}
-                alt="Mreport Logo"
-                className="w-20 h-20 lg:w-32 lg:h-32"
+                src="/images/favicon.png"
+                alt="mReport Logo"
+                width={128}
+                height={128}
+                className="w-32 h-32"
               />
-            </div>
+            </Link>
+
           </div>
 
           {/* Heading */}
-          <div className="space-y-2">
+          <div className="text-center space-y-2">
             <h1 className="text-3xl font-bold text-foreground">Create your account</h1>
             <p className="text-muted-foreground">
-              Join mReport to begin contributing to the humanitarian response network.
+              Join mReport to contribute to humanitarian response
             </p>
           </div>
 
-          {/* Registration Form */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* First Name & Last Name */}
-            <div className="flex gap-4">
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="first_name" className="text-sm font-medium text-foreground">
-                  First Name <span className="text-destructive">*</span>
-                </Label>
+            {/* Name Row */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="first_name">First Name <span className="text-destructive">*</span></Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                  <User className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="first_name"
                     name="first_name"
                     value={formData.first_name}
                     onChange={handleChange}
                     placeholder="John"
-                    className="pl-9 h-12"
+                    className="pl-10 h-12"
                     required
                   />
                 </div>
-                {errors.first_name && (
-                  <p className="text-sm text-destructive">{errors.first_name}</p>
-                )}
+                {errors.first_name && <p className="text-sm text-destructive">{errors.first_name}</p>}
               </div>
 
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="last_name" className="text-sm font-medium text-foreground">
-                  Last Name <span className="text-destructive">*</span>
-                </Label>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Last Name <span className="text-destructive">*</span></Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                  <User className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="last_name"
                     name="last_name"
                     value={formData.last_name}
                     onChange={handleChange}
                     placeholder="Doe"
-                    className="pl-9 h-12"
+                    className="pl-10 h-12"
                     required
                   />
                 </div>
-                {errors.last_name && (
-                  <p className="text-sm text-destructive">{errors.last_name}</p>
-                )}
+                {errors.last_name && <p className="text-sm text-destructive">{errors.last_name}</p>}
               </div>
             </div>
 
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-foreground">
-                Email Address <span className="text-destructive">*</span>
-              </Label>
+              <Label htmlFor="email">Email Address <span className="text-destructive">*</span></Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                <Mail className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="email"
                   name="email"
                   type="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="you@example.com"
-                  className="pl-9 h-12"
+                  placeholder="you@example.org"
+                  className="pl-10 h-12"
                   required
                 />
               </div>
               {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
             </div>
 
+            {/* Organization */}
+            <div className="space-y-2">
+              <Label htmlFor="organization_name">Organization Name <span className="text-destructive">*</span></Label>
+              <div className="relative">
+                <Users className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  id="organization_name"
+                  name="organization_name"
+                  value={formData.organization_name}
+                  onChange={handleChange}
+                  placeholder="e.g. UNICEF Uganda, Red Cross"
+                  className="pl-10 h-12"
+                  required
+                />
+              </div>
+              {errors.organization_name && (
+                <p className="text-sm text-destructive">{errors.organization_name}</p>
+              )}
+            </div>
+
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-foreground">
-                Password <span className="text-destructive">*</span>
-              </Label>
+              <Label htmlFor="password">Password <span className="text-destructive">*</span></Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                <Lock className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password"
                   name="password"
@@ -220,15 +235,15 @@ const RegisterPage: React.FC = () => {
                   value={formData.password}
                   onChange={handleChange}
                   placeholder="At least 8 characters"
-                  className="pl-9 pr-10 h-12"
+                  className="pl-10 pr-12 h-12"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {showPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
                 </button>
               </div>
               {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
@@ -236,69 +251,58 @@ const RegisterPage: React.FC = () => {
 
             {/* Confirm Password */}
             <div className="space-y-2">
-              <Label htmlFor="password2" className="text-sm font-medium text-foreground">
-                Confirm Password <span className="text-destructive">*</span>
-              </Label>
+              <Label htmlFor="password2">Confirm Password <span className="text-destructive">*</span></Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-3 text-muted-foreground h-4 w-4" />
+                <Lock className="absolute left-3 top-3.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   id="password2"
                   name="password2"
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.password2}
                   onChange={handleChange}
-                  placeholder="Re-enter password"
-                  className="pl-9 pr-10 h-12"
+                  placeholder="Re-enter your password"
+                  className="pl-10 pr-12 h-12"
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
                 >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showConfirmPassword ? <EyeOff className="h-5 w-5 text-muted-foreground" /> : <Eye className="h-5 w-5 text-muted-foreground" />}
                 </button>
               </div>
               {errors.password2 && <p className="text-sm text-destructive">{errors.password2}</p>}
             </div>
 
+            {/* General Error */}
             {errors.general && (
-              <p className="text-sm text-destructive text-center">{errors.general}</p>
+              <p className="text-sm text-destructive text-center font-medium">{errors.general}</p>
             )}
 
-            <Button type="submit" className="w-full h-12 text-base" disabled={isLoading}>
+            {/* Submit */}
+            <button
+              type="submit"
+              className="w-full h-12 text-white bg-orange-600 font-semibold rounded-lg"
+              disabled={isLoading}
+            >
               {isLoading ? 'Creating Account...' : 'Register'}
-            </Button>
+            </button>
           </form>
 
-          {/* Divider */}
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-background text-muted-foreground">
-                Already have an account?
-              </span>
-            </div>
-          </div>
-
-          {/* Login Redirect */}
+          {/* Login Link */}
           <p className="text-center text-sm text-muted-foreground">
-            Go to{' '}
-            <Link href="/login" className="text-orange-300 hover:underline font-medium">
-              Login
+            Already have an account?{' '}
+            <Link href="/login" className="font-medium text-orange-600 hover:underline">
+              Log in here
             </Link>
           </p>
         </div>
       </div>
-
     </div>
   );
 };
 
 export default RegisterPage;
+
+     

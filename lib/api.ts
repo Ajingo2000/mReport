@@ -4,7 +4,7 @@ import Cookies from "js-cookie";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "../constants";
 
 const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "api.mreport.org/api";
 
 console.log("API Base:", API_BASE_URL);
 

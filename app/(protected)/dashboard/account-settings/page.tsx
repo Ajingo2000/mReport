@@ -1,4 +1,7 @@
-"use client"
+"use client";
+
+export const dynamic = 'force-dynamic';
+
 
 import { useState, useEffect } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
@@ -17,12 +20,13 @@ import { useUserProfile } from "@/hooks/api/useAuth"; // Fetch user data
 import api from "@/lib/api"; // API client
 import { useMutation } from "@tanstack/react-query";
 
+
 const AccountSettings = () => {
   const [showActivityFeed, setShowActivityFeed] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  const { data: userData, isLoading, error } = useUserProfile(); // Fetch user profile
+  const { data: userData, isPending, error } = useUserProfile(); // Fetch user profile
 
   const [settings, setSettings] = useState({
     emailNotifications: true,
@@ -189,9 +193,9 @@ const AccountSettings = () => {
                         placeholder="Confirm new password"
                       />
                     </div>
-                    <Button type="submit" className="w-full" disabled={updatePasswordMutation.isLoading}>
+                    <Button type="submit" className="w-full" disabled={updatePasswordMutation.isPending}>
                       <Lock className="h-4 w-4 mr-2" />
-                      {updatePasswordMutation.isLoading ? "Updating..." : "Update Password"}
+                      {updatePasswordMutation.isPending ? "Updating..." : "Update Password"}
                     </Button>
                   </form>
 
@@ -363,9 +367,9 @@ const AccountSettings = () => {
 
             {/* Save Button */}
             <div className="flex justify-end">
-              <Button onClick={handleSettingsSubmit} size="lg" disabled={updateSettingsMutation.isLoading}>
+              <Button onClick={handleSettingsSubmit} size="lg" disabled={updateSettingsMutation.isPending}>
                 <Settings className="h-4 w-4 mr-2" />
-                {updateSettingsMutation.isLoading ? "Saving..." : "Save All Settings"}
+                {updateSettingsMutation.isPending ? "Saving..." : "Save All Settings"}
               </Button>
             </div>
 

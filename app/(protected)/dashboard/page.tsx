@@ -29,10 +29,10 @@ export default function Dashboard() {
   // ========================
   // FILTER SRHR REPORTS ONLY
   // ========================
+  const srhrReports = (reports?.filter(
+    (r) => r.report_type === "srhr"
+  ) || []) as any[];
 
-  const srhrReports = reports?.filter(
-    (r: any) => r.report_type === "srhr"
-  ) || [];
 
   const maternal = srhrReports.filter(r => r.srhr_type === "maternal_health");
   const contraceptive = srhrReports.filter(r => r.srhr_type === "contraceptive");
@@ -44,9 +44,9 @@ export default function Dashboard() {
   const resolved = srhrReports.filter(r => r.status === "Resolved");
 
   // Filter map data to only SRHR + GBV
-  const filteredMap = mapData?.filter(
+  const filteredMap = (mapData?.filter(
     (point: any) => point.report_type === "srhr"
-  ) || [];
+  ) || []) as any[];
 
   return (
     <SidebarProvider>

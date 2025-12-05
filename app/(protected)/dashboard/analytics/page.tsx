@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = 'force-dynamic';
+
 import { useState, useEffect } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
@@ -74,17 +76,17 @@ const Analytics = () => {
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                       <RechartsPieChart>
-                        <Pie
+                             <Pie
                           data={analytics?.reportsByType || []}
                           cx="50%"
                           cy="50%"
                           labelLine={false}
-                          label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="value"
                         >
-                          {(analytics?.reportsByType || []).map((entry: any, index: number) => (
+                           {(analytics?.reportsByType || []).map((_: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>

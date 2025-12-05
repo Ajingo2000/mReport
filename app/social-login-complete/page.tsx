@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import Cookies from "js-cookie";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/constants";
 
-export default function SocialLoginComplete() {
+function SocialLoginCompleteContent() {
   const router = useRouter();
   const params = useSearchParams();
 
@@ -20,13 +20,20 @@ export default function SocialLoginComplete() {
 
     Cookies.set(ACCESS_TOKEN, access, { expires: 1, sameSite: "lax" });
     Cookies.set(REFRESH_TOKEN, refresh, { expires: 7, sameSite: "lax" });
-
     router.push("/dashboard");
-  }, []);
+  }, [params, router]);
 
   return (
     <div className="flex items-center justify-center h-screen">
       <p>Completing login...</p>
     </div>
+  );
+}
+
+export default function SocialLoginComplete() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SocialLoginCompleteContent />
+    </Suspense>
   );
 }

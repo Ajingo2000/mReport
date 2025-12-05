@@ -3,7 +3,7 @@
 import { Mail, Phone, Facebook, Twitter, Linkedin } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import myLogo from "@/public/images/favicon.png";
+
 
 export const Footer = () => {
   return (
@@ -13,8 +13,10 @@ export const Footer = () => {
           {/* Brand */}
           <div className="md:col-span-2">
             <div className=""><Image
-                src={myLogo}
+                src="images/favicon.png"
                 alt="Mreport Logo"
+                width={128}
+                height={128}
                 className="w-20 h-20 lg:w-32 lg:h-32"
               /></div>
             <p className="text-white/80 mb-6 leading-relaxed">

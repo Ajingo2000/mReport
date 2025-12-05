@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import myLogo from "@/public/images/favicon.png";
+
 
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,9 +39,10 @@ export const Navbar = () => {
                 aria-label="Go to homepage"
               >
                 <Image
-                  src={myLogo}
+                  src="images/favicon.png"
                   alt="mReport Logo"
-                  
+                  width={128}
+                  height={128}
                   className="w-20 h-20 lg:w-32 lg:h-32 object-contain transition-transform group-hover:scale-110"
                 />
               </button>

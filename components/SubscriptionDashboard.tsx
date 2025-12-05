@@ -1,9 +1,8 @@
 import { useAppSelector } from '@/hooks';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Heart, AlertTriangle, Building, Activity } from 'lucide-react';
+import { Heart, AlertTriangle, Activity } from 'lucide-react';
 import ReportTypesChart from '@/components/charts/ReportTypesChart';
-import DamageCountsChart from '@/components/charts/DamageCountsChart';
 import AssistanceCountsChart from '@/components/charts/AssistanceCountsChart';
 import SRHRCountsChart from '@/components/charts/SRHRCountsChart';
 import { SubscriptionType } from '@/types/api';
@@ -17,7 +16,7 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
 
   const getSubscriptionConfig = (subscription: SubscriptionType) => {
     switch (subscription) {
-      case 'SRHR':
+      case 'srhr':
         return {
           title: 'Sexual & Reproductive Health Dashboard',
           description: 'Maternal care, family planning, and reproductive health services',
@@ -27,57 +26,38 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
           borderColor: 'border-pink-200 dark:border-pink-800',
           charts: [
             { component: SRHRCountsChart, title: 'SRHR Service Types' },
-            { component: AssistanceCountsChart, title: 'Assistance Provided' }
+            { component: AssistanceCountsChart, title: 'Assistance Provided' },
           ],
           metrics: [
             { label: 'Maternal Care', value: 45, unit: 'services' },
             { label: 'Family Planning', value: 23, unit: 'consultations' },
             { label: 'Health Education', value: 12, unit: 'sessions' },
-            { label: 'Emergency Cases', value: 8, unit: 'referrals' }
-          ]
+            { label: 'Emergency Cases', value: 8, unit: 'referrals' },
+          ],
         };
-      
-      case 'Emergency':
+
+      case 'gbv':
         return {
-          title: 'Emergency Response Dashboard',
-          description: 'Critical incidents, first response, and emergency coordination',
+          title: 'Gender-Based Violence Dashboard',
+          description: 'Protection, response, and support for survivors',
           icon: AlertTriangle,
-          color: 'text-red-500',
+          color: 'text-red-600',
           bgColor: 'bg-red-50 dark:bg-red-950/20',
           borderColor: 'border-red-200 dark:border-red-800',
           charts: [
-            { component: ReportTypesChart, title: 'Emergency Types' },
-            { component: AssistanceCountsChart, title: 'Response Actions' }
+            { component: ReportTypesChart, title: 'GBV Incident Types' },
+            { component: AssistanceCountsChart, title: 'Support Services' },
           ],
           metrics: [
-            { label: 'Active Incidents', value: 12, unit: 'cases' },
-            { label: 'Response Time', value: 8, unit: 'minutes avg' },
-            { label: 'Responders Online', value: 24, unit: 'personnel' },
-            { label: 'Resolved Today', value: 6, unit: 'incidents' }
-          ]
-        };
-      
-      case 'Disaster':
-        return {
-          title: 'Disaster Management Dashboard',
-          description: 'Infrastructure damage, critical facilities, and disaster response',
-          icon: Building,
-          color: 'text-orange-500',
-          bgColor: 'bg-orange-50 dark:bg-orange-950/20',
-          borderColor: 'border-orange-200 dark:border-orange-800',
-          charts: [
-            { component: DamageCountsChart, title: 'Infrastructure Damage' },
-            { component: AssistanceCountsChart, title: 'Recovery Efforts' }
+            { label: 'Safe Referrals', value: 38, unit: 'cases' },
+            { label: 'Psychosocial Support', value: 29, unit: 'sessions' },
+            { label: 'Legal Aid', value: 15, unit: 'provided' },
+            { label: 'Shelter Access', value: 11, unit: 'placements' },
           ],
-          metrics: [
-            { label: 'Critical Infrastructure', value: 18, unit: 'facilities' },
-            { label: 'Damage Assessment', value: 34, unit: 'reports' },
-            { label: 'Recovery Projects', value: 7, unit: 'ongoing' },
-            { label: 'Shelter Capacity', value: 150, unit: 'people' }
-          ]
         };
-      
-      default: // 'All'
+
+      case 'All':
+      default:
         return {
           title: 'Comprehensive Dashboard',
           description: 'All report types and system-wide metrics',
@@ -87,16 +67,14 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
           borderColor: 'border-blue-200 dark:border-blue-800',
           charts: [
             { component: ReportTypesChart, title: 'All Report Types' },
-            { component: DamageCountsChart, title: 'Damage Categories' },
-            { component: AssistanceCountsChart, title: 'Assistance Types' },
-            { component: SRHRCountsChart, title: 'SRHR Services' }
+            { component: SRHRCountsChart, title: 'SRHR Services' },
           ],
           metrics: [
             { label: 'Total Reports', value: 156, unit: 'reports' },
             { label: 'Active Cases', value: 42, unit: 'ongoing' },
             { label: 'Resolved Today', value: 18, unit: 'completed' },
-            { label: 'System Uptime', value: 99.9, unit: '%' }
-          ]
+            { label: 'System Uptime', value: 99.9, unit: '%' },
+          ],
         };
     }
   };
@@ -106,7 +84,7 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
 
   return (
     <div className={className}>
-      {/* Subscription Header */}
+      {/* Header */}
       <Card className={`mb-6 ${config.bgColor} ${config.borderColor}`}>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -118,13 +96,13 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
               </div>
             </div>
             <Badge variant="outline" className={config.color}>
-              {currentSubscription} View
+              {currentSubscription === 'All' ? 'All Reports' : currentSubscription} View
             </Badge>
           </div>
         </CardHeader>
       </Card>
 
-      {/* Key Metrics */}
+      {/* Metrics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {config.metrics.map((metric, index) => (
           <Card key={index}>
@@ -137,7 +115,7 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
         ))}
       </div>
 
-      {/* Charts Grid */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {config.charts.map((chart, index) => (
           <Card key={index}>
@@ -155,3 +133,4 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
 };
 
 export default SubscriptionDashboard;
+

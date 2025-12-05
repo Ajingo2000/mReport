@@ -20,33 +20,48 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
   const [formData, setFormData] = useState<Partial<CreateReportRequest>>({
     title: '',
     description: '',
-    type: 'Infrastructure',
-    subtype: '',
+    report_type: 'srhr' as const,
+    subtype: 'maternal_health',  // ← plain string, no casting
     latitude: 0,
     longitude: 0,
-    address: '',
-    priority: 'medium',
+    location: '',
+    phone_number: '',
+    priority: 'medium' as const,
   });
+  
   const [images, setImages] = useState<File[]>([]);
   const [locationLoading, setLocationLoading] = useState(false);
 
   const createReportMutation = useCreateReport();
   const { toast } = useToast();
 
-  const reportTypes = {
-    Infrastructure: ['Road Damage', 'Water System', 'Electricity', 'Building Damage'],
-    Emergency: ['Fire', 'Flood', 'Accident', 'Security Incident'],
-    Health: ['Disease Outbreak', 'Medical Emergency', 'Healthcare Access'],
-    Education: ['School Damage', 'Resource Shortage', 'Access Issues'],
-    SRHR: ['Maternal Health', 'Family Planning', 'Gender-Based Violence', 'Youth Health'],
+  const reportTypes: Record<string, string[]> = {
+    srhr: [
+      'Maternal Health Emergency',
+      'Contraceptive Access Issue',
+      'HIV/STI Services',
+      'Family Planning',
+      'Adolescent Sexual Health',
+      'Other SRHR'
+    ],
+    gbv: [
+      'Physical Violence',
+      'Sexual Violence',
+      'Emotional/Psychological Abuse',
+      'Economic Violence',
+      'FGM',
+      'Child/Early Marriage',
+      'Help & Support Request',
+      'Other GBV'
+    ],
   };
-
+  
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
     // Reset subtype when type changes
-    if (field === 'type') {
-      setFormData(prev => ({ ...prev, subtype: '' }));
+    if (field === 'report_type') {
+      setFormData(prev => ({ ...prev, subreport_type: '' }));
     }
   };
 
@@ -99,7 +114,7 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.title || !formData.description || !formData.type || !formData.subtype) {
+    if (!formData.title || !formData.description || !formData.report_type || !formData.subtype) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -132,11 +147,11 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
       setFormData({
         title: '',
         description: '',
-        type: 'Infrastructure',
-        subtype: '',
+        report_type: 'srhr',
+        subtype: 'maternal_health',  // ← valid default value
         latitude: 0,
         longitude: 0,
-        address: '',
+        location: '',
         priority: 'medium',
       });
       setImages([]);
@@ -199,8 +214,8 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
               <div>
                 <Label htmlFor="type">Report Type *</Label>
                 <Select 
-                  value={formData.type} 
-                  onValueChange={(value) => handleInputChange('type', value)}
+                  value={formData.report_type} 
+                  onValueChange={(value) => handleInputChange('report_type', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -220,13 +235,13 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
                 <Select 
                   value={formData.subtype} 
                   onValueChange={(value) => handleInputChange('subtype', value)}
-                  disabled={!formData.type}
+                  disabled={!formData.report_type}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select subtype" />
                   </SelectTrigger>
                   <SelectContent>
-                    {formData.type && reportTypes[formData.type as keyof typeof reportTypes]?.map((subtype) => (
+                    {formData.report_type && reportTypes[formData.report_type as keyof typeof reportTypes]?.map((subtype) => (
                       <SelectItem key={subtype} value={subtype}>
                         {subtype}
                       </SelectItem>
@@ -277,7 +292,7 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
                   <Label htmlFor="address">Address</Label>
                   <Input
                     id="address"
-                    value={formData.address}
+                    value={formData.location}
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     placeholder="Street address or description"
                   />

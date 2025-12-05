@@ -3,7 +3,8 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
 import { ACCESS_TOKEN } from '@/constants'
-import { AuthService } from '@/lib/services'
+import { AuthService, User } from '@/lib/services'
+
 
 interface AuthContextType {
   user: User | null

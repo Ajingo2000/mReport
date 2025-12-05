@@ -14,10 +14,27 @@ export interface RegisterData {
   password2: string;
 }
 
+
+
+export interface User {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  organization?: string | null;
+  email_verified: boolean;
+  role: string;
+  subscriptions: ('srhr' | 'gbv')[]; // user can subscribe to one or both
+  pofile_picture?: string | null
+  created_at: string;
+}
+
 export interface LoginResponse {
   access: string;
   refresh: string;
-  user: any;
+  user: User;
+  needs_verification?: boolean;   // ← ADD THIS LINE
+  message?: string;
 }
 
 export interface RegisterResponse {
@@ -26,15 +43,7 @@ export interface RegisterResponse {
   email: string;
 }
 
-export interface User {
-  id: string;
-  email: string;
-  first_name: string;
-  last_name: string;
-  organization: string | null;
-  email_verified: boolean;
-  role: string;
-}
+
 
 // =============================
 // BASE URL

@@ -5,9 +5,9 @@ import { TrendingUp } from 'lucide-react';
 import { useDamageCounts } from '@/hooks';
 
 const DamageCountsChart = () => {
-  const { data, isLoading, error } = useDamageCounts();
+  const { data, isPending, error } = useDamageCounts();
 
-  if (isLoading) {
+  if (isPending) {
     return (
       <Card>
         <CardHeader>

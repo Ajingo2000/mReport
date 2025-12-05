@@ -1,38 +1,50 @@
-'use client'
+// app/verify-email/[key]/page.tsx
+'use client';
 import { AuthService } from '@/lib/services';
-import { useParams } from 'next/navigation';
-import React,{useEffect, useState} from 'react'
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import Cookies from 'js-cookie';
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '@/constants';
 
-const VerifyEmailPage = () => {
-      const {key} = useParams<{ key:string }>()
-      
-   const [status,setStatus] =useState<'verifying' | 'success' | 'error'>('verifying');
-    const [errorMessage, setErrorMessage] = useState<string | null>(null);
+export default function VerifyEmailPage() {
+  const { key } = useParams<{ key: string }>();
+  const router = useRouter();
+  const [status, setStatus] = useState<'verifying' | 'success' | 'error'>('verifying');
+  const [errorMessage, setErrorMessage] = useState('');
 
-    useEffect(() => {
-    if (!key) return setStatus("error");
-    const verifyEmail = async () => {
-        setStatus("verifying");
-        const response = await AuthService.verifyEmail(key as string);  
+  useEffect(() => {
+    if (!key) {
+      setStatus('error');
+      setErrorMessage('Invalid verification link');
+      return;
+    }
 
-        // Check if response has error
-        if (response?.error) {
-          setStatus("error");
-          setErrorMessage(response.error?.message || 'An error occurred while verifying your email');
-          return;
-        } 
-        if (response?.message && response?.access  && response.refresh && response.user ) {
-          setStatus("success");
-          // Redirect to dashboard
+    const verify = async () => {
+      try {
+        const response = await AuthService.verifyEmail(key);
+
+        if (response?.message?.includes('success')) {
+          // Save tokens from response
+          if (response.access && response.refresh) {
+            Cookies.set(ACCESS_TOKEN, response.access, { expires: 1 });
+            Cookies.set(REFRESH_TOKEN, response.refresh, { expires: 7 });
+          }
+
+          setStatus('success');
           setTimeout(() => {
-           window.location.href = '/dashboard';
+            router.push('/dashboard');
           }, 2000);
+        } else {
+          throw new Error(response?.error || 'Verification failed');
         }
-     
+      } catch (err: any) {
+        setStatus('error');
+        setErrorMessage(err.message || 'Link expired or invalid');
+      }
     };
 
-    verifyEmail();
-  }, [key]);
+    verify();
+  }, [key, router]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
@@ -88,5 +100,3 @@ const VerifyEmailPage = () => {
   );
       
 }
-
-export default VerifyEmailPage
