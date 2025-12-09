@@ -142,7 +142,7 @@ export const AuthService = {
   // -----------------------------
   resendVerificationEmail: async (email: string) => {
     try {
-      const res = await api.post(`${baseURL}/resend-verification/`, { email });
+      const res = await api.post(`${baseURL}/api/resend-verification/`, { email });
       return res.data;
     } catch (error) {
       console.log("Error resending verification email:", error);
@@ -155,7 +155,7 @@ export const AuthService = {
   // -----------------------------
   getUserProfile: async () => {
     try {
-      const res = await api.get<User>(`${baseURL}/profile/`);
+      const res = await api.get<User>(`${baseURL}/api/profile/`);
       return res.data;
     } catch (error) {
       console.log("Error getting profile:", error);

@@ -1,5 +1,7 @@
-"use client";
 
+
+
+"use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
@@ -12,7 +14,6 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { MapPin, Filter, Navigation, Layers, CalendarRange, Download, LocateFixed, RefreshCcw, Search } from "lucide-react";
 import useSWR from "swr";
 import { useAuth } from "@/contexts/AuthContext";
-
 import {
   Source,
   Layer,
@@ -32,14 +33,13 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { CSVLink } from "react-csv";
-import Cookies from "js-cookie";
+
 import ReportFilter from "@/components/ReportFilter"; // Updated import for ReportFilter
 import ReportNotifications from "@/components/ReportNotifications"; // Import for ReportNotifications
 import { FiAlertCircle } from "react-icons/fi";
 import mapboxgl from "mapbox-gl";
+/// <reference types="react-map-gl" />
 
-// ADD THIS LINE — THIS IS THE SOLUTION
-export const dynamic = 'force-dynamic';
 
 mapboxgl.workerUrl = new URL(
   "mapbox-gl/dist/mapbox-gl-csp-worker.js",
@@ -86,6 +86,7 @@ function toGeoJSON(features: any[]) {
   };
 }
 
+
 function debounce<T extends (...args: any[]) => void>(fn: T, wait = 400): T {
   let t: NodeJS.Timeout;
   return ((...args: Parameters<T>) => {
@@ -93,7 +94,6 @@ function debounce<T extends (...args: any[]) => void>(fn: T, wait = 400): T {
     t = setTimeout(() => fn(...args), wait);
   }) as T;
 }
-
 
 function toCSVData(reports: any[]) {
   return reports.map((r: any) => ({
@@ -270,7 +270,8 @@ const userLocationLayer = {
   },
 };
 
-
+// 
+const { user } = useAuth();
 
 const MapView = () => {
   const mapRef = useRef<any>(null);
@@ -294,20 +295,20 @@ const MapView = () => {
     status: "",
   });
 
-// Inside your component:
-const { user, loading: authLoading } = useAuth();
-const subscriptions = user?.subscriptions || [];
 
-// Optional: show loading state
-if (authLoading) {
-  return <div>Loading user...</div>;
-}
+  // Inside your component:
+  const { user, loading: authLoading } = useAuth();
+  const subscriptions = user?.subscriptions || [];
 
+  // Optional: show loading state
+  if (authLoading) {
+    return <div>Loading user...</div>;
+  }
   const { data: reportsData, error: reportsError, isLoading: isReportsLoading } = useSWR<any[]>(
-      "csReports/",
-      fetcher,
-      { refreshInterval: 15000 }
-    );
+    "csReports/",
+    fetcher,
+    { refreshInterval: 15000 }
+  );
 
   useEffect(() => {
     document.title = "Map View - mReport | Geographic Report Visualization";
@@ -329,7 +330,7 @@ if (authLoading) {
           const data = await res.json();
           place_name = data.place_name || place_name;
         }
-      } catch {}
+      } catch { }
       setUserLocation({ lat, lng, place_name });
       mapRef.current?.flyTo({ center: [lng, lat], zoom: 12, duration: 2000 });
     });
@@ -360,8 +361,8 @@ if (authLoading) {
   // Pre-filter reports by subscriptions (before other filters)
   const subscriptionFilteredReports = useMemo(() => {
     if (!reportsData || !Array.isArray(reportsData)) return [];
-    return subscriptions.length === 0 
-      ? reportsData 
+    return subscriptions.length === 0
+      ? reportsData
       : reportsData.filter(r => subscriptions.includes(r.report_type));
   }, [reportsData, subscriptions]);
 
@@ -567,7 +568,7 @@ if (authLoading) {
     setStatusFilter(criteria.status ? [criteria.status] : null);
   };
 
-  const handleReportClick = (report:any) => {
+  const handleReportClick = (report: any) => {
     const lat = parseFloat(report.latitude);
     const lon = parseFloat(report.longitude);
     if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
@@ -610,6 +611,8 @@ if (authLoading) {
     return bgColor;
   };
 
+  
+
   const capitalizeLabel = (label: string) => {
     return label.replaceAll('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
@@ -622,15 +625,15 @@ if (authLoading) {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <DashboardSidebar />
-        
+
         <div className="flex-1 flex flex-col">
-          <DashboardNavbar 
+          <DashboardNavbar
             onToggleActivityFeed={() => setShowPanel(!showPanel)}
             showActivityFeed={showPanel}
           />
-          
+
           <main className="flex-1 p-6 space-y-6">
-           
+
 
             <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
               {/* Filter panel left */}
@@ -664,7 +667,7 @@ if (authLoading) {
 
                       <section>
                         <p className="text-xs font-medium text-gray-500 mb-2">Subtype</p>
-                        <div className="space-y-4 text-sm"> 
+                        <div className="space-y-4 text-sm">
                           <div>
                             <p className="font-semibold mb-1">Damage</p>
                             <div className="grid grid-cols-1 gap-1">
@@ -767,12 +770,12 @@ if (authLoading) {
                                     const lng = pos.coords.longitude;
                                     let place_name = "Your Location";
                                     try {
-                                      const res = await fetch(`api/user-location/?lat=${lat}&lon=${lng}`);
+                                      const res = await fetch(`user-location/?lat=${lat}&lon=${lng}`);
                                       if (res.ok) {
                                         const data = await res.json();
                                         place_name = data.place_name || place_name;
                                       }
-                                    } catch {}
+                                    } catch { }
                                     setUserLocation({ lat, lng, place_name });
                                     mapRef.current?.flyTo({ center: [lng, lat], zoom: 12, duration: 2000 });
                                   });
@@ -809,7 +812,7 @@ if (authLoading) {
                             {mapped.map((report) => (
                               <li
                                 key={report.report_id}
-                                ref={(el) => { if (el) itemRefs.current.set(report.report_id, el); }}                             
+                                ref={(el) => { if (el) itemRefs.current.set(report.report_id, el); }}
                                 className={classNames(
                                   "p-3 rounded-lg border border-border/50 hover:bg-muted/30 transition-smooth cursor-pointer",
                                   getBgColor(report.report_type),
@@ -920,16 +923,17 @@ if (authLoading) {
                       clusterMaxZoom={14}
                       clusterRadius={50}
                     >
-                     {heatmapOn && <Layer {...(heatmapLayer as any)} />}
-                                           <Layer {...(clusterLayer as any)} />
-                                           <Layer {...(clusterCountLayer as any)} />
-                                           <Layer {...(pulseLayer as any)} />
-                                           {!heatmapOn && <Layer {...(unclusteredLayer as any)} />}
-                                         </Source>
-                     
-                                         {userGeojson && (
-                                           <Source id="user-location" type="geojson" data={userGeojson}>
-                                             <Layer {...(userLocationLayer as any)} />
+                      {heatmapOn && <Layer {...(heatmapLayer as any)} />}
+                      <Layer {...(clusterLayer as any)} />
+                      <Layer {...(clusterCountLayer as any)} />
+                      <Layer {...(pulseLayer as any)} />
+                      {!heatmapOn && <Layer {...(unclusteredLayer as any)} />}
+                    </Source>
+
+                    {userGeojson && (
+                      <Source id="user-location" type="geojson" data={userGeojson}>
+                        <Layer {...(userLocationLayer as any)} />
+
                       </Source>
                     )}
 
@@ -963,7 +967,7 @@ if (authLoading) {
                             </div>
                           )}
                           <div className="flex items-center gap-2">
-                            <FiAlertCircle /> 
+                            <FiAlertCircle />
                             <Badge variant={getStatusBadgeVariant(selected.props.status)}>
                               {selected.props.status}
                             </Badge>
@@ -1028,3 +1032,4 @@ if (authLoading) {
 };
 
 export default MapView;
+

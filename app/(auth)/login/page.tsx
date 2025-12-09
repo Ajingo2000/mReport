@@ -233,7 +233,8 @@ const Login = () => {
             </button>
           </form>
 
-          {/* Divider */}
+          {/*
+          
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-border"></div>
@@ -245,7 +246,8 @@ const Login = () => {
             </div>
           </div>
 
-          {/* Google Button */}
+        
+          
           <button
             type="button"
             className="w-full h-12 border-orange-300 text-orange-700 hover:bg-orange-50 font-medium "
@@ -259,6 +261,7 @@ const Login = () => {
             </svg>
             Continue with Google
           </button>
+          */}
 
           <p className="text-center text-gray-600">
             Don't have an account?{" "}
