@@ -12,8 +12,9 @@ import Cookies from "js-cookie";
 export interface CsReport {
   id: number;
   report_id: string;
-  report_type: "damage" | "assistance" | "srhr";
+  report_type: "damage" | "assistance" | "srhr" | 'gbv';
   srhr_type: "maternal_health" | "contraceptive" | "hiv" | "gbv_support" | "other" | null;
+  gbv_type: "physical_violence" | "sexual_violence" | "emotional_abuse" | "economic_violence" | "fgm" | "child_marriage" | "other" | null;
   description: string;
   location: string;
   latitude: number | null;
@@ -71,7 +72,7 @@ export const useDashboardStats = (): ApiResponse<DashboardStats> => {
         setLoading(true);
         setError(null);
 
-        const stats = await apiGet<DashboardStats>("/dashboard/stats/");
+        const stats = await apiGet<DashboardStats>("/reports/stats/");
         setData(stats);
       } catch (err: any) {
         setError(String(err));
@@ -99,7 +100,7 @@ export const useReports = (): ApiResponse<CsReport[]> => {
         setLoading(true);
         setError(null);
 
-        const reports = await apiGet<CsReport[]>("/reports/");
+        const reports = await apiGet<CsReport[]>("/reports/list/");
         setData(reports);
       } catch (err: any) {
         setError(String(err));
@@ -132,7 +133,7 @@ export const useMapData = (): ApiResponse<CsReport[]> => {
         // If backend has /reports/map/ endpoint, switch this line:
         // const mapData = await apiGet<CsReport[]>("/reports/map/");
 
-        const reports = await apiGet<CsReport[]>("/reports/");
+        const reports = await apiGet<CsReport[]>("/reports/list/");
         const withCoords = reports.filter(
           (r) => r.latitude !== null && r.longitude !== null
         );

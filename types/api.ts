@@ -7,7 +7,6 @@ export type ReportPriority = 'low' | 'medium' | 'high' | 'critical';
 // Main report categories — we only care about these two
 export type ReportType = 'srhr' | 'gbv';
 
-
 // Subtypes for SRHR
 export type SRHRSubtype =
   | 'maternal_health'
@@ -36,7 +35,6 @@ export type SubscriptionFilter = 'All' | 'SRHR' | 'GBV';
 // In src/types/api.ts
 export type SubscriptionType = 'srhr' | 'gbv' | 'All';
 
-
 // Main User type from backend
 export interface User {
   id: string;
@@ -60,7 +58,6 @@ export interface User {
   two_factor_auth?: boolean;
   data_sharing?: boolean;
 }
-
 
 // Responder details (for assigned cases)
 export interface Responder {
@@ -139,19 +136,7 @@ export interface AuthTokens {
   refresh: string;
 }
 
-// Request payload for creating a new report (SRHR & GBV focused)
-export interface CreateReportRequest {
-  title: string;
-  description: string;
-  report_type: 'srhr' | 'gbv';
-  subtype: ReportSubtype;
-  latitude: number;
-  longitude: number;
-  location: string;
-  phone_number?: string;
-  priority?: ReportPriority;
-  images?: File[];
-}
+
 
 // Add these to the end of src/types/api.ts
 
@@ -182,6 +167,7 @@ export interface Feedback extends CreateFeedbackRequest {
   user: User;
   created_at: string;
 }
+
 
 // ──────────────────────────────────────────────
 // Responder & Profile Update Types

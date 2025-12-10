@@ -9,7 +9,7 @@ export const PartnershipSection = () => {
           <h2 className="text-3xl md:text-4xl  text-black mb-6 drop-shadow-lg">
             Join Us in Building Resilient Communities
           </h2>
-          <p className="text-lg text-black max-w-3xl mx-auto leading-relaxed">
+          <p className="text-lg text-orange-100 max-w-3xl mx-auto leading-relaxed">
             Are you an NGO, government agency, or responder? Partner with us...
           </p>
         </div>
@@ -23,7 +23,7 @@ export const PartnershipSection = () => {
                   <Icon className="w-8 h-8 text-orange-300" />
                 </div>
                 <h3 className="text-lg  text-black mb-2">{partner.title}</h3>
-                <p className="text-black text-sm">Collaborate to make a difference</p>
+                <p className="text-orange-100 text-sm">Collaborate to make a difference</p>
               </div>
             );
           })}
@@ -31,12 +31,13 @@ export const PartnershipSection = () => {
 
         <div className="text-center">
           <Button
+            variant="hero"
             size="lg"
             className="bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-xl hover:shadow-orange-500/40 transition-all hover:scale-105"
           >
             Partner With Us
           </Button>
-          <p className="text-black text-sm mt-4">Contact us to discuss partnership opportunities</p>
+          <p className="text-orange-100 text-sm mt-4">Contact us to discuss partnership opportunities</p>
         </div>
       </div>
     </section>

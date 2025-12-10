@@ -1,6 +1,4 @@
-"use client";
-
-export const dynamic = 'force-dynamic';
+"use client"
 
 
 import { useState, useEffect } from "react";
@@ -26,7 +24,7 @@ const AccountSettings = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
 
-  const { data: userData, isPending, error } = useUserProfile(); // Fetch user profile
+  const { data: userData, isLoading, error } = useUserProfile(); // Fetch user profile
 
   const [settings, setSettings] = useState({
     emailNotifications: true,
@@ -193,9 +191,9 @@ const AccountSettings = () => {
                         placeholder="Confirm new password"
                       />
                     </div>
-                    <Button type="submit" className="w-full" disabled={updatePasswordMutation.isPending}>
+                    <Button type="submit" className="w-full" disabled={updatePasswordMutation.isLoading}>
                       <Lock className="h-4 w-4 mr-2" />
-                      {updatePasswordMutation.isPending ? "Updating..." : "Update Password"}
+                      {updatePasswordMutation.isLoading ? "Updating..." : "Update Password"}
                     </Button>
                   </form>
 
@@ -367,9 +365,9 @@ const AccountSettings = () => {
 
             {/* Save Button */}
             <div className="flex justify-end">
-              <Button onClick={handleSettingsSubmit} size="lg" disabled={updateSettingsMutation.isPending}>
+              <Button onClick={handleSettingsSubmit} size="lg" disabled={updateSettingsMutation.isLoading}>
                 <Settings className="h-4 w-4 mr-2" />
-                {updateSettingsMutation.isPending ? "Saving..." : "Save All Settings"}
+                {updateSettingsMutation.isLoading ? "Saving..." : "Save All Settings"}
               </Button>
             </div>
 
@@ -381,7 +379,7 @@ const AccountSettings = () => {
                   <div>
                     <p className="text-sm font-medium text-blue-900">Django API Integration</p>
                     <p className="text-xs text-blue-700 mt-1">
-                      Settings save to: <code className="bg-blue-100 px-1 rounded">PATCH /users/update/</code>
+                      {/* Settings save to: <code className="bg-blue-100 px-1 rounded">PATCH /users/update/</code> */}
                     </p>
                   </div>
                 </div>

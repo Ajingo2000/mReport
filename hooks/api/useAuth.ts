@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { useAppDispatch, useAppSelector } from '@/hooks';
@@ -37,12 +37,8 @@ export const useUserProfile = () => {
       const res = await api.get('/auth/profile/');
       return res.data;
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: typeof window !== 'undefined', // ← ONLY RUN ON CLIENT
+    staleTime: 5 * 60 * 1000,
     retry: 1,
-    // This is the KEY: only run on client AND after auth check
-    enabled: typeof window !== 'undefined',
   });
 };
-
-
-     

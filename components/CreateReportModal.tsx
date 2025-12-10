@@ -20,15 +20,13 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
   const [formData, setFormData] = useState<Partial<CreateReportRequest>>({
     title: '',
     description: '',
-    report_type: 'srhr' as const,
-    subtype: 'maternal_health',  // ← plain string, no casting
+    type: 'srhr' as const,
+    subtype: '',
     latitude: 0,
     longitude: 0,
-    location: '',
-    phone_number: '',
-    priority: 'medium' as const,
+    address: '',
+    priority: 'medium',
   });
-  
   const [images, setImages] = useState<File[]>([]);
   const [locationLoading, setLocationLoading] = useState(false);
 
@@ -55,13 +53,13 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
       'Other GBV'
     ],
   };
-  
+
   const handleInputChange = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
+
     // Reset subtype when type changes
-    if (field === 'report_type') {
-      setFormData(prev => ({ ...prev, subreport_type: '' }));
+    if (field === 'type') {
+      setFormData(prev => ({ ...prev, subtype: '' }));
     }
   };
 
@@ -88,11 +86,11 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        setFormData(prev => ({ 
-          ...prev, 
-          latitude, 
+        setFormData(prev => ({
+          ...prev,
+          latitude,
           longitude,
-          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}` 
+          address: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
         }));
         setLocationLoading(false);
         toast({
@@ -113,8 +111,8 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!formData.title || !formData.description || !formData.report_type || !formData.subtype) {
+
+    if (!formData.title || !formData.description || !formData.type || !formData.subtype) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -147,11 +145,11 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
       setFormData({
         title: '',
         description: '',
-        report_type: 'srhr',
-        subtype: 'maternal_health',  // ← valid default value
+        type: 'Infrastructure',
+        subtype: '',
         latitude: 0,
         longitude: 0,
-        location: '',
+        address: '',
         priority: 'medium',
       });
       setImages([]);
@@ -175,7 +173,7 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
           </Button>
         )}
       </DialogTrigger>
-      
+
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -213,9 +211,9 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="type">Report Type *</Label>
-                <Select 
-                  value={formData.report_type} 
-                  onValueChange={(value) => handleInputChange('report_type', value)}
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => handleInputChange('type', value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select type" />
@@ -232,16 +230,16 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
 
               <div>
                 <Label htmlFor="subtype">Subtype *</Label>
-                <Select 
-                  value={formData.subtype} 
+                <Select
+                  value={formData.subtype}
                   onValueChange={(value) => handleInputChange('subtype', value)}
-                  disabled={!formData.report_type}
+                  disabled={!formData.type}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select subtype" />
                   </SelectTrigger>
                   <SelectContent>
-                    {formData.report_type && reportTypes[formData.report_type as keyof typeof reportTypes]?.map((subtype) => (
+                    {formData.type && reportTypes[formData.type as keyof typeof reportTypes]?.map((subtype) => (
                       <SelectItem key={subtype} value={subtype}>
                         {subtype}
                       </SelectItem>
@@ -253,8 +251,8 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
 
             <div>
               <Label htmlFor="priority">Priority</Label>
-              <Select 
-                value={formData.priority} 
+              <Select
+                value={formData.priority}
                 onValueChange={(value) => handleInputChange('priority', value)}
               >
                 <SelectTrigger>
@@ -292,7 +290,7 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
                   <Label htmlFor="address">Address</Label>
                   <Input
                     id="address"
-                    value={formData.location}
+                    value={formData.address}
                     onChange={(e) => handleInputChange('address', e.target.value)}
                     placeholder="Street address or description"
                   />
@@ -374,8 +372,8 @@ const CreateReportModal: React.FC<CreateReportModalProps> = ({ trigger }) => {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={createReportMutation.isPending}
             >
               {createReportMutation.isPending ? 'Creating...' : 'Create Report'}

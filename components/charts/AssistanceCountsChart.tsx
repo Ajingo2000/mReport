@@ -5,9 +5,9 @@ import { Users } from 'lucide-react';
 import { useAssistanceCounts } from '@/hooks';
 
 const AssistanceCountsChart = () => {
-  const { data, isPending, error } = useAssistanceCounts();
+  const { data, isLoading, error } = useAssistanceCounts();
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>

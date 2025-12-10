@@ -1,31 +1,30 @@
+"use client";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Navigation } from "lucide-react";
+import { useLiveReports } from "@/contexts/LiveReportsContext";
+
 
 interface MapDataPoint {
   id: number;
   latitude: number;
   longitude: number;
-  type: string;
-  status: "Pending" | "In Progress" | "Resolved";
+  report_type: string;
   location: string;
+  status: string;
 }
+
 
 interface MapViewProps {
   data: MapDataPoint[];
   loading?: boolean;
 }
 
-export function MapView({ data, loading }: MapViewProps) {
+export function MapView({ loading }: MapViewProps) {
   // Mock map implementation - in a real app you'd use Google Maps, Mapbox, etc.
-  const mockLocations = [
-    { name: "Juba Central", reports: 5, lat: 4.8594, lng: 31.5713 },
-    { name: "Wau", reports: 3, lat: 7.7025, lng: 28.0158 },
-    { name: "Malakal", reports: 2, lat: 9.5334, lng: 31.6584 },
-    { name: "Bentiu", reports: 4, lat: 9.2333, lng: 29.7833 },
-    { name: "Bor", reports: 1, lat: 6.2088, lng: 31.5594 },
-  ];
+  const { reports } = useLiveReports();
 
   return (
     <Card className="h-96">
@@ -47,7 +46,7 @@ export function MapView({ data, loading }: MapViewProps) {
         ) : (
           <div className="relative h-64 bg-muted/30 rounded-md overflow-hidden">
             {/* Mock Map Background */}
-            <div 
+            <div
               className="absolute inset-0 bg-gradient-to-br from-primary/5 via-accent/5 to-secondary/5"
               style={{
                 backgroundImage: `
@@ -57,31 +56,32 @@ export function MapView({ data, loading }: MapViewProps) {
                 `
               }}
             />
-            
-            {/* Mock Location Markers */}
+
+            {/* Live Location Markers */}
             <div className="absolute inset-0 p-4">
-              {mockLocations.map((location, index) => (
+              {reports.map((report) => (
                 <div
-                  key={location.name}
+                  key={report.id}
                   className="absolute transform -translate-x-1/2 -translate-y-1/2 cursor-pointer group"
                   style={{
-                    left: `${20 + index * 15}%`,
-                    top: `${30 + (index % 2) * 20}%`,
+                    left: `${50 + (report.longitude - 31.5) * 10}%`,
+                    top: `${50 - (report.latitude - 4.8) * 10}%`,
                   }}
                 >
                   <div className="relative">
                     <div className="w-4 h-4 bg-destructive rounded-full border-2 border-white shadow-lg animate-pulse" />
-                    <Badge 
-                      variant="secondary" 
+                    <Badge
+                      variant="secondary"
                       className="absolute -top-8 left-1/2 transform -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity text-xs"
                     >
-                      {location.name}: {location.reports} reports
+                      {report.location} — {report?.report_type}
                     </Badge>
                   </div>
                 </div>
               ))}
+
             </div>
-            
+
             {/* Legend */}
             <div className="absolute bottom-4 left-4 bg-background/90 backdrop-blur-sm rounded-md p-3 shadow-sm">
               <div className="text-xs font-medium mb-2">Report Status</div>
@@ -100,7 +100,7 @@ export function MapView({ data, loading }: MapViewProps) {
                 </div>
               </div>
             </div>
-            
+
             {/* Center overlay message */}
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="text-center text-muted-foreground">

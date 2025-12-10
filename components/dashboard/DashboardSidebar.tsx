@@ -11,7 +11,10 @@ import {
   BarChart3,
   MapPin,
   Building,
-  Home
+  Home,
+  Settings,
+  LayoutDashboard,
+  UploadIcon
 } from "lucide-react";
 import {
   Sidebar,
@@ -24,15 +27,17 @@ import {
   SidebarMenuItem,
   useSidebar
 } from "@/components/ui/sidebar";
+import Image from "next/image";
 
 const menuItems = [
-  { title: "Dashboard", url: "/dashboard", icon: BarChart3 },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Analytics", url: "/dashboard/analytics", icon: BarChart3 },
   { title: "Map View", url: "/dashboard/mapview", icon: MapPin },
   { title: "Edit Profile", url: "/dashboard/edit-profile", icon: Users },
   { title: "Account Settings", url: "/dashboard/account-settings", icon: Building },
   { title: "Support", url: "/dashboard/support", icon: HelpCircle },
-  { title: "Upgrade Plan", url: "/dashboard/upgrade-plan", icon: Building },
+  { title: "Upgrade Plan", url: "/dashboard/upgrade-plan", icon: UploadIcon },
+  { title: "Integrations", url: "/dashboard/integrations", icon: Mail },
 ];
 
 export function DashboardSidebar() {
@@ -51,15 +56,18 @@ export function DashboardSidebar() {
     <Sidebar className="border-r border-border">
       <SidebarContent className="bg-sidebar">
         {/* Logo Section */}
-        <div className="p-6 border-b border-sidebar-border">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Home className="w-5 h-5 text-primary-foreground" />
-            </div>
+        <div className="p-2 border-b border-sidebar-border">
+          <div className="flex items-center justify-center">
+            
             {!isCollapsed && (
-              <h1 className="text-xl font-bold text-sidebar-foreground">
-                mReport
-              </h1>
+              <Image
+                src="/images/favicon.png"
+                alt="mReport Logo"
+                width={98}
+                height={98}
+                priority
+                className="w-20 h-10 lg:w-32 lg:h-20"
+              />
             )}
           </div>
         </div>
@@ -99,7 +107,7 @@ export function DashboardSidebar() {
               href="/"
               className="flex items-center gap-3 text-sidebar-foreground hover:bg-sidebar-accent/50"
             >
-              <Home className="w-5 h-5" />
+              <Settings className="w-5 h-5" />
               {!isCollapsed && <span>Back to Site</span>}
             </Link>
           </SidebarMenuButton>

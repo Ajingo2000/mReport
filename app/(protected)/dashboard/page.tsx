@@ -9,6 +9,7 @@ import { MapView } from "@/components/dashboard/MapView";
 import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useDashboardStats, useReports, useMapData } from "@/hooks/useDashboardApi";
+import { EmailVerificationBanner } from "@/components/dashboard/DashboardBanner";
 
 import {
   Baby,
@@ -29,10 +30,10 @@ export default function Dashboard() {
   // ========================
   // FILTER SRHR REPORTS ONLY
   // ========================
-  const srhrReports = (reports?.filter(
-    (r) => r.report_type === "srhr"
-  ) || []) as any[];
 
+  const srhrReports = (reports?.filter(
+  (r) => r.report_type === "srhr"
+) || []) as any[];
 
   const maternal = srhrReports.filter(r => r.srhr_type === "maternal_health");
   const contraceptive = srhrReports.filter(r => r.srhr_type === "contraceptive");
@@ -44,9 +45,9 @@ export default function Dashboard() {
   const resolved = srhrReports.filter(r => r.status === "Resolved");
 
   // Filter map data to only SRHR + GBV
-  const filteredMap = (mapData?.filter(
-    (point: any) => point.report_type === "srhr"
-  ) || []) as any[];
+ const filteredMap = (mapData?.filter(
+  (point: any) => point.report_type === "srhr"
+) || []) as any[];
 
   return (
     <SidebarProvider>
@@ -60,7 +61,7 @@ export default function Dashboard() {
           />
 
           <main className="flex-1 p-6 space-y-8">
-
+            <EmailVerificationBanner />
             {/* --------------------- SRHR CARDS --------------------- */}
             <section>
               <h2 className="text-2xl font-bold mb-4 text-foreground">

@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = 'force-dynamic';
-
 import { useState, useEffect } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
@@ -43,13 +41,13 @@ const Analytics = () => {
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <DashboardSidebar />
-        
+
         <div className="flex-1 flex flex-col">
-          <DashboardNavbar 
+          <DashboardNavbar
             onToggleActivityFeed={() => setShowActivityFeed(!showActivityFeed)}
             showActivityFeed={showActivityFeed}
           />
-          
+
           <main className="flex-1 p-6 space-y-6">
             <div className="mb-6">
               <h1 className="text-3xl font-bold text-foreground mb-2">Analytics Dashboard</h1>
@@ -76,7 +74,7 @@ const Analytics = () => {
                   <CardContent>
                     <ResponsiveContainer width="100%" height={300}>
                       <RechartsPieChart>
-                             <Pie
+                        <Pie
                           data={analytics?.reportsByType || []}
                           cx="50%"
                           cy="50%"
@@ -86,7 +84,7 @@ const Analytics = () => {
                           fill="#8884d8"
                           dataKey="value"
                         >
-                           {(analytics?.reportsByType || []).map((_: any, index: number) => (
+                          {(analytics?.reportsByType || []).map((_: any, index: number) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>

@@ -1,6 +1,4 @@
 
-
-
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
@@ -99,7 +97,7 @@ function toCSVData(reports: any[]) {
   return reports.map((r: any) => ({
     ID: r.report_id,
     Type: r.report_type,
-    Subtype: r.damage_type || r.assistance_type || r.srhr_type || "other",
+    Subtype: r.gbv || r.srhr_type || "other",
     Status: r.status,
     Description: r.description,
     Location: r.location,
@@ -269,9 +267,6 @@ const userLocationLayer = {
     "circle-stroke-color": "#ffffff",
   },
 };
-
-// 
-const { user } = useAuth();
 
 const MapView = () => {
   const mapRef = useRef<any>(null);
@@ -1032,4 +1027,3 @@ const MapView = () => {
 };
 
 export default MapView;
-

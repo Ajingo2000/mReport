@@ -133,4 +133,3 @@ const SubscriptionDashboard = ({ className }: SubscriptionDashboardProps) => {
 };
 
 export default SubscriptionDashboard;
-

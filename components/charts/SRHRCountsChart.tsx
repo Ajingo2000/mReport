@@ -5,9 +5,9 @@ import { Heart } from 'lucide-react';
 import { useSRHRCounts } from '@/hooks';
 
 const SRHRCountsChart = () => {
-  const { data, isPending, error } = useSRHRCounts();
+  const { data, isLoading, error } = useSRHRCounts();
 
-  if (isPending) {
+  if (isLoading) {
     return (
       <Card>
         <CardHeader>

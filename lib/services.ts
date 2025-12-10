@@ -14,7 +14,17 @@ export interface RegisterData {
   password2: string;
 }
 
+export interface LoginResponse {
+  access: string;
+  refresh: string;
+  user: User;
+}
 
+export interface RegisterResponse {
+  message: string;
+  user_id: string;
+  email: string;
+}
 
 export interface User {
   id: string;
@@ -24,26 +34,10 @@ export interface User {
   organization?: string | null;
   email_verified: boolean;
   role: string;
-  subscriptions: ('srhr' | 'gbv')[]; // user can subscribe to one or both
-  pofile_picture?: string | null
+  subscriptions: ("srhr" | "gbv")[];
+  profile_picture?: string | null;
   created_at: string;
 }
-
-export interface LoginResponse {
-  access: string;
-  refresh: string;
-  user: User;
-  needs_verification?: boolean;   // ← ADD THIS LINE
-  message?: string;
-}
-
-export interface RegisterResponse {
-  message: string;
-  user_id: string;
-  email: string;
-}
-
-
 
 // =============================
 // BASE URL
@@ -59,7 +53,7 @@ const cookieOptions = {
 };
 
 // =============================
-// SERVICE OBJECT
+// UPDATED SERVICE OBJECT
 // =============================
 export const AuthService = {
   // -----------------------------
@@ -72,42 +66,47 @@ export const AuthService = {
         userData
       );
       return res.data;
-    } catch (error) {
-      console.log("Error in AuthService.register:", error);
-      throw error;
+    } catch (error: any) {
+      throw error.response?.data || error;
     }
   },
 
   // -----------------------------
-  // LOGIN
+  // LOGIN (FULLY FIXED)
   // -----------------------------
-  login: async (email: string, password: string) => {
+  login: async (email: string, password: string): Promise<LoginResponse> => {
     try {
       const res = await api.post<LoginResponse>(`${baseURL}/login/`, {
         email,
         password,
       });
 
-      if (res.status === 200) {
-        const { access, refresh } = res.data;
+      const { access, refresh } = res.data;
 
-        // Save JWT in cookies
-        Cookies.set(ACCESS_TOKEN, access, {
-          ...cookieOptions,
-          expires: 1,
-        });
+      // Store tokens
+      Cookies.set(ACCESS_TOKEN, access, {
+        ...cookieOptions,
+        expires: 1,
+      });
 
-        Cookies.set(REFRESH_TOKEN, refresh, {
-          ...cookieOptions,
-          expires: 7,
-        });
+      Cookies.set(REFRESH_TOKEN, refresh, {
+        ...cookieOptions,
+        expires: 7,
+      });
 
-        return res.data;
-      }
-    } catch (error) {
-      console.log("Error in AuthService.login:", error);
-      throw error;
+      return res.data;
+    } catch (error: any) {
+      const backend = error?.response?.data;
+
+      let message = "Login failed. Please try again.";
+
+      if (backend?.error) message = backend.error;
+      if (backend?.detail) message = backend.detail;
+
+      // MOST IMPORTANT LINE:
+      throw new Error(message);
     }
+
   },
 
   // -----------------------------
@@ -131,9 +130,8 @@ export const AuthService = {
       }
 
       return res.data;
-    } catch (error) {
-      console.log("Error verifying email:", error);
-      throw error;
+    } catch (error: any) {
+      throw error.response?.data || error;
     }
   },
 
@@ -142,24 +140,22 @@ export const AuthService = {
   // -----------------------------
   resendVerificationEmail: async (email: string) => {
     try {
-      const res = await api.post(`${baseURL}/api/resend-verification/`, { email });
+      const res = await api.post(`${baseURL}/resend-verification/`, { email });
       return res.data;
-    } catch (error) {
-      console.log("Error resending verification email:", error);
-      throw error;
+    } catch (error: any) {
+      throw error.response?.data || error;
     }
   },
 
   // -----------------------------
-  // GET USER PROFILE
+  // GET USER PROFILE (FIXED)
   // -----------------------------
-  getUserProfile: async () => {
+  getUserProfile: async (): Promise<User> => {
     try {
-      const res = await api.get<User>(`${baseURL}/api/profile/`);
+      const res = await api.get<User>(`${baseURL}/profile/`);
       return res.data;
-    } catch (error) {
-      console.log("Error getting profile:", error);
-      throw error;
+    } catch (error: any) {
+      throw error.response?.data || { error: "Failed to fetch profile." };
     }
   },
 

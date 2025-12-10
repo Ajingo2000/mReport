@@ -39,16 +39,16 @@ export const loginUser = createAsyncThunk(
 );
 
 export const signupUser = createAsyncThunk(
-   'auth/register',
-   async (data: SignupRequest, { rejectWithValue }) => {
-     try {
-       const res = await api.post('/auth/register/', data);
-       return res.data;
-     } catch (error: any) {
-       return rejectWithValue(error.response?.data);
-     }
-   }
- );
+  'auth/register',
+  async (data: SignupRequest, { rejectWithValue }) => {
+    try {
+      const res = await api.post('/auth/register/', data);
+      return res.data;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data);
+    }
+  }
+);
 
 export const fetchUserProfile = createAsyncThunk(
   'auth/fetchProfile',
@@ -144,7 +144,6 @@ const authSlice = createSlice({
   },
 });
 
-
 export const {
   clearError,
   setCurrentSubscription,
@@ -153,4 +152,3 @@ export const {
 } = authSlice.actions;
 
 export default authSlice.reducer;
-

@@ -1,14 +1,14 @@
-// app/(protected)/layout.tsx  ← FINAL VERSION
 "use client";
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { Provider } from "react-redux";
 import { store } from "@/store/store";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { QueryProvider } from "@/contexts/QueryProvider";
+import { LiveReportsProvider } from "@/contexts/LiveReportsContext";
 
-// This runs ONCE when the store is created — even before any component mounts
-store.dispatch({ type: 'theme/initializeTheme' });
+// This runs ONCE when the store is created
+store.dispatch({ type: "theme/initializeTheme" });
 
 export default function ProtectedLayout({
   children,
@@ -19,7 +19,12 @@ export default function ProtectedLayout({
     <Provider store={store}>
       <QueryProvider>
         <AuthProvider>
-          {children}
+
+          {/* ✅ WEBSOCKET PROVIDER ADDED HERE */}
+          <LiveReportsProvider>
+            {children}
+          </LiveReportsProvider>
+
         </AuthProvider>
       </QueryProvider>
     </Provider>

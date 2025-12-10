@@ -94,7 +94,7 @@ const RegisterPage: React.FC = () => {
   // ------------------- Success Screen -------------------
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-bl from-indigo-50 via-sky-100 to-blue-200 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-bl from-orange-200 via-orange-300 to-orange-400 flex items-center justify-center p-4">
         <div className="bg-white p-10 rounded-xl shadow-lg max-w-md w-full text-center">
           <div className="flex justify-center mb-6">
             <div className="bg-green-100 p-4 rounded-full">
@@ -119,13 +119,13 @@ const RegisterPage: React.FC = () => {
 
   // ------------------- Registration Form -------------------
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex ">
       {/* Left Side: Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
           {/* Logo */}
-          <div className="flex justify-center">
-            <Link href="/">
+          <div className="flex items-center justify-center">
+            <Link href="/" className='p'>←</Link>
               <Image
                 src="/images/favicon.png"
                 alt="mReport Logo"
@@ -133,7 +133,7 @@ const RegisterPage: React.FC = () => {
                 height={128}
                 className="w-32 h-32"
               />
-            </Link>
+            
 
           </div>
 
@@ -304,5 +304,3 @@ const RegisterPage: React.FC = () => {
 };
 
 export default RegisterPage;
-
-     
