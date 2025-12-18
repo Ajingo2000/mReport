@@ -49,8 +49,7 @@ export function DashboardSidebar() {
 
   const isCollapsed = state === "collapsed";
   const isAdmin = user?.role === "admin"; // Adjust based on your User type
-  
-  console.log("User role:", user?.org_role);
+
 
   const isActive = (path: string) => {
     if (path === "/dashboard") return pathname === "/dashboard";
@@ -61,19 +60,29 @@ export function DashboardSidebar() {
     <Sidebar className="border-r border-border">
       <SidebarContent className="bg-sidebar">
         {/* Logo Section */}
-        <div className="p-2 border-b border-sidebar-border">
-          <div className="flex items-center justify-center">
-            {!isCollapsed && (
-              <Image
-                src="/images/favicon.png"
-                alt="mReport Logo"
-                width={98}
-                height={98}
-                priority
-                className="w-20 h-10 lg:w-32 lg:h-20"
-              />
-            )}
+        <div className="p-4 border-b border-sidebar-border">
+          <div className="flex">
+            <p className="text-xl font-bold">mReport <sup className="text-xs">TM</sup></p>
           </div>
+
+          <div className="">
+            <span
+              className={`flex  gap-2 mt-1 px-2 py-0.5 text-sm rounded-full font-medium
+                        ${user?.role === 'admin' || user?.org_role === 'admin'
+                  ? 'bg-red-600 text-white'
+                  : user?.role === 'responder' || user?.org_role === 'responder'
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-200 text-gray-800'
+                }`}
+              title={user?.role ?? user?.org_role ?? 'Member'}
+            >
+              {/* Role label */}
+              {(user?.role === 'admin' || user?.org_role === 'admin') ? `Administrator - ${user?.first_name || 'Member'}`
+                : (user?.role === 'responder' || user?.org_role === 'responder') ? `Responder - ${user?.first_name || 'Member'}`
+                  : 'Member'}
+            </span>
+          </div>
+
         </div>
 
         {/* Main Navigation */}
@@ -87,11 +96,10 @@ export function DashboardSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton
                     asChild
-                    className={`transition-smooth ${
-                      isActive(item.url)
+                    className={`transition-smooth ${isActive(item.url)
                         ? "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
                         : "text-sidebar-foreground hover:bg-sidebar-accent/50"
-                    }`}
+                      }`}
                   >
                     <Link href={item.url} className="flex items-center gap-3">
                       <item.icon className="w-5 h-5 flex-shrink-0" />
