@@ -15,6 +15,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { Settings, Lock, Bell, Globe, Shield, Eye, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useUserProfile } from "@/hooks/api/useAuth"; // Fetch user data
+import { Skeleton } from "@/components/ui/skeleton";
 import api from "@/lib/api"; // API client
 import { useMutation } from "@tanstack/react-query";
 
@@ -126,8 +127,45 @@ const AccountSettings = () => {
     updateSettingsMutation.mutate(settings);
   };
 
+  if (isLoading) {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <DashboardSidebar />
+          <div className="flex-1 flex flex-col">
+            <DashboardNavbar onToggleActivityFeed={() => {}} showActivityFeed={false} />
+            <main className="flex-1 p-6 space-y-6">
+              <div className="space-y-2">
+                <Skeleton className="h-9 w-64" />
+                <Skeleton className="h-5 w-96" />
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <Card key={i}>
+                    <CardHeader>
+                      <Skeleton className="h-7 w-40" />
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {[...Array(4)].map((_, j) => (
+                        <div key={j} className="space-y-2">
+                          <Skeleton className="h-5 w-32" />
+                          <Skeleton className="h-10 w-full" />
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
   if (error) {
-    return <div>Error loading profile: {error.message}</div>;
+    return <div className="p-6 text-destructive">Error loading profile: {error.message}</div>;
   }
 
   return (
@@ -191,9 +229,9 @@ const AccountSettings = () => {
                         placeholder="Confirm new password"
                       />
                     </div>
-                    <Button type="submit" className="w-full" disabled={updatePasswordMutation.isLoading}>
+                    <Button type="submit" className="w-full" >
                       <Lock className="h-4 w-4 mr-2" />
-                      {updatePasswordMutation.isLoading ? "Updating..." : "Update Password"}
+                      { "Update Password"}
                     </Button>
                   </form>
 
@@ -365,26 +403,13 @@ const AccountSettings = () => {
 
             {/* Save Button */}
             <div className="flex justify-end">
-              <Button onClick={handleSettingsSubmit} size="lg" disabled={updateSettingsMutation.isLoading}>
+              <Button onClick={handleSettingsSubmit} size="lg">
                 <Settings className="h-4 w-4 mr-2" />
-                {updateSettingsMutation.isLoading ? "Saving..." : "Save All Settings"}
+                 {"Save All Settings"}
               </Button>
             </div>
 
-            {/* API Integration Note */}
-            <Card className="border-blue-200 bg-blue-50/50">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-medium text-blue-900">Django API Integration</p>
-                    <p className="text-xs text-blue-700 mt-1">
-                      {/* Settings save to: <code className="bg-blue-100 px-1 rounded">PATCH /users/update/</code> */}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+         
           </main>
         </div>
       </div>

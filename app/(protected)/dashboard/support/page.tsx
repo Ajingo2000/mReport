@@ -13,9 +13,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { HelpCircle, Send, MessageCircle, Phone, Mail, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import {Skeleton } from "@/components/ui/skeleton";
 
 const Support = () => {
   const [showActivityFeed, setShowActivityFeed] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { toast } = useToast();
 
   useEffect(() => {
@@ -142,6 +145,49 @@ const Support = () => {
       answer: "Click the 'Forgot Password' link on the login page and enter your email address. You'll receive instructions to reset your password. If you continue having issues, contact our support team."
     }
   ];
+
+  // Add skeleton before main return
+if (isLoading) { // Replace with real loading state if you fetch FAQs or user data
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex w-full bg-background">
+        <DashboardSidebar />
+        <div className="flex-1 flex flex-col">
+          <DashboardNavbar onToggleActivityFeed={() => {}} showActivityFeed={false} />
+          <main className="flex-1 p-6 space-y-6">
+            <div className="space-y-2">
+              <Skeleton className="h-9 w-64" />
+              <Skeleton className="h-5 w-96" />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <Card>
+                <CardHeader><Skeleton className="h-7 w-48" /></CardHeader>
+                <CardContent className="space-y-6">
+                  {[...Array(4)].map((_, i) => (
+                    <Skeleton key={i} className="h-20 w-full" />
+                  ))}
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-2">
+                <CardHeader><Skeleton className="h-7 w-56" /></CardHeader>
+                <CardContent>
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="space-y-4">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </div>
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
 
   return (
     <SidebarProvider>

@@ -153,7 +153,7 @@ export function DashboardNavbar({ onToggleActivityFeed, showActivityFeed }: Dash
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="relative h-10 w-10 rounded-full ml-1">
                 <Avatar className="h-9 w-9">
-                  <AvatarImage src={user?.profile_picture} alt={user?.first_name || 'User'} />
+                  <AvatarImage src={user?.profile_picture || ''} alt={user?.first_name || 'User'} />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {user ?
                       (user.first_name?.[0] || '') + (user.last_name?.[0] || '')

@@ -10,6 +10,7 @@ import { ActivityFeed } from "@/components/dashboard/ActivityFeed";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { useDashboardStats, useReports, useMapData } from "@/hooks/useDashboardApi";
 import { EmailVerificationBanner } from "@/components/dashboard/DashboardBanner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 import {
   Baby,
@@ -22,7 +23,7 @@ import {
 
 export default function Dashboard() {
   const [showActivityFeed, setShowActivityFeed] = useState(true);
-
+  
   const { data: reports, loading: reportsLoading } = useReports();
   const { data: mapData, loading: mapLoading } = useMapData();
   const { data: stats } = useDashboardStats();
@@ -49,6 +50,53 @@ export default function Dashboard() {
   (point: any) => point.report_type === "srhr"
 ) || []) as any[];
 
+const srhrTotal =
+  stats?.find((s) => s.report_type === "srhr")?.total ?? 0;
+
+const gbvTotal =
+  stats?.find((s) => s.report_type === "gbv")?.total ?? 0;
+
+  // Overall page loading: wait for all critical data
+  const isPageLoading = reportsLoading || mapLoading ;
+
+   // ==================== LOADING SKELETON ====================
+  if (isPageLoading) {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <DashboardSidebar />
+          <div className="flex-1 flex flex-col">
+            <DashboardNavbar
+              onToggleActivityFeed={() => {}}
+              showActivityFeed={true}
+            />
+            <main className="flex-1 p-6 space-y-8">
+              <Skeleton className="h-10 w-48" /> {/* Title */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {[...Array(4)].map((_, i) => (
+                  <Skeleton key={i} className="h-32 rounded-lg" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-32 rounded-lg" />
+                ))}
+              </div>
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2 space-y-6">
+                  <Skeleton className="h-96 rounded-lg" /> {/* Table */}
+                  <Skeleton className="h-96 rounded-lg" /> {/* Map */}
+                </div>
+                <Skeleton className="h-96 rounded-lg xl:col-span-1" /> {/* Activity Feed */}
+              </div>
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
@@ -65,21 +113,21 @@ export default function Dashboard() {
             {/* --------------------- SRHR CARDS --------------------- */}
             <section>
               <h2 className="text-2xl font-bold mb-4 text-foreground">
-                SRHR Overview
+                Reports Overview
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 <StatsCard
-                  title="Maternal Health"
-                  value={maternal.length}
+                  title="SRH Reports"
+                  value={srhrTotal}
                   icon={Baby}
                   className="bg-pink-50 dark:bg-pink-900/20 border-pink-300"
                 />
 
                 <StatsCard
-                  title="Contraceptive Access"
-                  value={contraceptive.length}
+                  title="GBV Reports"
+                  value={gbvTotal}
                   icon={Pill}
                   className="bg-purple-50 dark:bg-purple-900/20 border-purple-300"
                 />

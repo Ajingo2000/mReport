@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from "react";
 import { DashboardSidebar } from "@/components/dashboard/DashboardSidebar";
 import { DashboardNavbar } from "@/components/dashboard/DashboardNavbar";
@@ -7,11 +9,15 @@ import { Badge } from "@/components/ui/badge";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { Check, Crown, Zap, Shield, Star, ArrowRight, Users, BarChart3, MapPin, Headphones } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const UpgradePlan = () => {
   const [showActivityFeed, setShowActivityFeed] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState("pro");
   const { toast } = useToast();
+
+  // Add near the top after hooks
+  const [isLoading] = useState(false); // or derive from real subscription fetch later
 
   useEffect(() => {
     document.title = "Upgrade Plan - mReport | Choose Your Subscription";
@@ -92,7 +98,7 @@ const UpgradePlan = () => {
 
   const handleUpgrade = async (planId: string) => {
     setIsUpgrading(planId);
-    
+
     try {
       const response = await fetch('http://127.0.0.1:8000/api/upgrade/', {
         method: 'POST',
@@ -101,7 +107,7 @@ const UpgradePlan = () => {
           'Authorization': `Bearer ${localStorage.getItem('mreport_token') || ''}`,
         },
         credentials: 'include',
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           plan_type: planId,
           user_id: "current_user" // This would be dynamically set
         }),
@@ -114,7 +120,7 @@ const UpgradePlan = () => {
           title: "Upgrade Initiated",
           description: `Successfully upgraded to ${plans.find(p => p.id === planId)?.name} plan. Redirecting to payment...`,
         });
-        
+
         // Here you would redirect to Stripe/PayPal checkout
         console.log('Redirecting to payment processor...');
       } else {
@@ -139,24 +145,61 @@ const UpgradePlan = () => {
     { icon: Headphones, text: "98% customer satisfaction rate" }
   ];
 
+
+  if (isLoading) {
+    return (
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full bg-background">
+          <DashboardSidebar />
+          <div className="flex-1 flex flex-col">
+            <DashboardNavbar onToggleActivityFeed={() => { }} showActivityFeed={false} />
+            <main className="flex-1 p-6 space-y-8">
+              <div className="text-center space-y-4">
+                <Skeleton className="h-12 w-96 mx-auto" />
+                <Skeleton className="h-6 w-128 mx-auto" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+                {[...Array(3)].map((_, i) => (
+                  <Card key={i} className="space-y-4">
+                    <CardHeader className="text-center">
+                      <Skeleton className="w-16 h-16 rounded-2xl mx-auto mb-4" />
+                      <Skeleton className="h-8 w-48 mx-auto" />
+                      <Skeleton className="h-16 w-32 mx-auto" />
+                    </CardHeader>
+                    <CardContent>
+                      {[...Array(6)].map((_, j) => (
+                        <Skeleton key={j} className="h-5 w-full my-2" />
+                      ))}
+                      <Skeleton className="h-12 w-full mt-6" />
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </main>
+          </div>
+        </div>
+      </SidebarProvider>
+    );
+  }
+
   return (
     <SidebarProvider>
       <div className="min-h-screen flex w-full bg-background">
         <DashboardSidebar />
-        
+
         <div className="flex-1 flex flex-col">
-          <DashboardNavbar 
+          <DashboardNavbar
             onToggleActivityFeed={() => setShowActivityFeed(!showActivityFeed)}
             showActivityFeed={showActivityFeed}
           />
-          
+
           <main className="flex-1 p-6 space-y-6">
             <div className="mb-8 text-center">
               <h1 className="text-4xl font-bold text-foreground mb-4">Choose Your Plan</h1>
               <p className="text-xl text-muted-foreground mb-6">
                 Scale mReport to meet your organization's needs
               </p>
-              
+
               {/* Current Status */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                 {currentFeatures.map((feature, index) => (
@@ -181,17 +224,17 @@ const UpgradePlan = () => {
                       </Badge>
                     </div>
                   )}
-                  
+
                   <CardHeader className="text-center pb-2">
                     <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-primary to-primary-dark rounded-2xl flex items-center justify-center">
                       {plan.id === 'free' && <Users className="h-8 w-8 text-white" />}
                       {plan.id === 'pro' && <Zap className="h-8 w-8 text-white" />}
                       {plan.id === 'enterprise' && <Crown className="h-8 w-8 text-white" />}
                     </div>
-                    
+
                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
                     <p className="text-muted-foreground text-sm">{plan.description}</p>
-                    
+
                     <div className="mt-4">
                       <div className="flex items-baseline justify-center">
                         <span className="text-5xl font-bold text-foreground">${plan.price}</span>
@@ -204,7 +247,7 @@ const UpgradePlan = () => {
                       )}
                     </div>
                   </CardHeader>
-                  
+
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
                       {plan.features.map((feature, index) => (
@@ -213,7 +256,7 @@ const UpgradePlan = () => {
                           <span className="text-sm">{feature}</span>
                         </div>
                       ))}
-                      
+
                       {plan.limitations && plan.limitations.map((limitation, index) => (
                         <div key={index} className="flex items-center gap-2 opacity-60">
                           <div className="h-4 w-4 flex-shrink-0" />
@@ -221,18 +264,18 @@ const UpgradePlan = () => {
                         </div>
                       ))}
                     </div>
-                    
-                     <Button 
-                       className="w-full" 
-                       variant={plan.id === 'free' ? 'outline' : 'default'}
-                       size="lg"
-                       onClick={() => handleUpgrade(plan.id)}
-                       disabled={plan.id === 'free' || isUpgrading === plan.id}
-                     >
-                       {plan.id === 'free' ? 'Current Plan' : isUpgrading === plan.id ? 'Processing...' : 'Upgrade Now'}
-                       {plan.id !== 'free' && !isUpgrading && <ArrowRight className="h-4 w-4 ml-2" />}
-                     </Button>
-                    
+
+                    <Button
+                      className="w-full"
+                      variant={plan.id === 'free' ? 'outline' : 'default'}
+                      size="lg"
+                      onClick={() => handleUpgrade(plan.id)}
+                      disabled={plan.id === 'free' || isUpgrading === plan.id}
+                    >
+                      {plan.id === 'free' ? 'Current Plan' : isUpgrading === plan.id ? 'Processing...' : 'Upgrade Now'}
+                      {plan.id !== 'free' && !isUpgrading && <ArrowRight className="h-4 w-4 ml-2" />}
+                    </Button>
+
                     {plan.id === 'enterprise' && (
                       <Button variant="outline" className="w-full">
                         Contact Sales

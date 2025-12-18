@@ -290,20 +290,44 @@ const MapView = () => {
     status: "",
   });
 
-
-  // Inside your component:
+  // ────────────────────── ALL HOOKS MUST BE AT THE TOP ──────────────────────
   const { user, loading: authLoading } = useAuth();
-  const subscriptions = user?.subscriptions || [];
 
-  // Optional: show loading state
-  if (authLoading) {
-    return <div>Loading user...</div>;
-  }
   const { data: reportsData, error: reportsError, isLoading: isReportsLoading } = useSWR<any[]>(
     "csReports/",
     fetcher,
     { refreshInterval: 15000 }
   );
+
+  const subscriptions = user?.subscriptions || [];
+
+  // ────────────────────── EARLY RETURNS AFTER ALL HOOKS ──────────────────────
+  if (authLoading || isReportsLoading) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center text-lg">
+        Loading reports...
+      </div>
+    );
+  }
+
+  if (reportsError) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center text-red-600">
+        Failed to load reports: {String(reportsError)}
+      </div>
+    );
+  }
+
+  if (!reportsData || !Array.isArray(reportsData)) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        No report data available.
+      </div>
+    );
+  }
+
+  // ────────────────────── CONTINUE WITH THE REST OF YOUR COMPONENT ──────────────────────
+  // (All your existing useEffect, useMemo, functions, etc. go below this point)
 
   useEffect(() => {
     document.title = "Map View - mReport | Geographic Report Visualization";
@@ -611,10 +635,6 @@ const MapView = () => {
   const capitalizeLabel = (label: string) => {
     return label.replaceAll('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   };
-
-  if (isReportsLoading) {
-    return <div className="flex h-screen w-full items-center justify-center">Loading reports...</div>;
-  }
 
   return (
     <SidebarProvider>

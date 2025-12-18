@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { AuthService } from "@/lib/services";
 import { useToast } from "@/hooks/use-toast";
 import Image from "next/image";
@@ -24,6 +24,55 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isRedirecting, setIsRedirecting] = useState(false); // NEW
+
+  useEffect(() => {
+    if (!loading && user) {
+      setIsRedirecting(true); // Show loading during redirect
+      router.push("/dashboard");
+    }
+  }, [user, loading, router]);
+
+  const handleSubmit2 = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    try {
+      const res = await AuthService.login(email, password);
+      if (!res || !res.user) throw new Error("Unexpected server response.");
+
+      if (!res.user.email_verified) {
+        toast({
+          title: "Email Not Verified",
+          description: "Please check your inbox to verify your email.",
+          variant: "destructive",
+        });
+      }
+
+      toast({
+        title: "Welcome Back!",
+        description: `Hello, ${res.user.first_name || "User"}!`,
+      });
+
+      setIsRedirecting(true); // Trigger redirect loading
+      router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Login Error:", error);
+
+      // Extract backend message
+      const backendError = error.response?.data?.error;
+      const message = backendError || error.message || "Login failed. Please try again.";
+      setErrorMessage(message);
+
+      toast({
+        title: "Login Failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
 
   // -------------------------------------------------------
   // If already logged in, redirect automatically
@@ -100,7 +149,17 @@ const Login = () => {
   // -------------------------------------------------------
   // UI
   // -------------------------------------------------------
-  return (
+  // ==================== FULL SCREEN LOADING DURING REDIRECT ====================
+  if (isRedirecting) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center space-y-4">
+          <Loader2 className="h-12 w-12 animate-spin text-orange-600 mx-auto" />
+          <p className="text-lg text-foreground">Taking you to your dashboard...</p>
+        </div>
+      </div>
+    );
+  } else return (
     <div className="min-h-screen flex">
       <div className="flex-1 flex items-center justify-center p-8 bg-background">
         <div className="w-full max-w-md space-y-8">
@@ -127,7 +186,7 @@ const Login = () => {
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit2} className="space-y-6">
 
             {/* Email */}
             <div className="space-y-2">

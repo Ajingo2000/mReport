@@ -31,6 +31,13 @@ interface DashboardStats {
   responders_online: number;
 }
 
+type ReportStat = {
+  report_type: string;
+  total: number;
+};
+
+type DashStats = ReportStat[];
+
 interface ApiResponse<T> {
   data: T | null;
   loading: boolean;
@@ -61,8 +68,8 @@ async function apiGet<T>(url: string): Promise<T> {
 // 1. DASHBOARD STATS
 // ============================
 
-export const useDashboardStats = (): ApiResponse<DashboardStats> => {
-  const [data, setData] = useState<DashboardStats | null>(null);
+export const useDashboardStats = (): ApiResponse<ReportStat[]> => {
+  const [data, setData] = useState<ReportStat[] | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,7 +79,7 @@ export const useDashboardStats = (): ApiResponse<DashboardStats> => {
         setLoading(true);
         setError(null);
 
-        const stats = await apiGet<DashboardStats>("/reports/stats/");
+        const stats = await apiGet<ReportStat[]>("/reports/stats/");
         setData(stats);
       } catch (err: any) {
         setError(String(err));

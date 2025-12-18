@@ -34,6 +34,7 @@ export interface User {
   organization?: string | null;
   email_verified: boolean;
   role: string;
+  org_role?: "admin" | "responder" | "viewer";
   subscriptions: ("srhr" | "gbv")[];
   profile_picture?: string | null;
   created_at: string;

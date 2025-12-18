@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "@/components/providers/authContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,11 +14,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "mReport - Modern Reporting Tool",
-  description: "mReport is a modern reporting tool designed to streamline data collection and analysis for organizations worldwide.",
+  description: "…",
   icons: {
-    icon: "/images/favicon.png",
-  },  
+    icon: [
+      { url: "/favicon.png", type: "image/png" },
+    ],
+  },
 };
+
+
 
 export default function RootLayout({
   children,
@@ -28,14 +31,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      
+
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        
-                {children}
-        
-  
+
+        {children}
+
+
       </body>
     </html>
   );

@@ -4,7 +4,6 @@ import { useSelector, type TypedUseSelectorHook } from 'react-redux';
 import type { RootState } from '@/store/store';
 // API hooks
 export * from './api/useAuth';
-export * from './api/useReports';
 export * from './api/useProfile';
 export * from './api/useFeedback';
 export * from './api/useSupport';
