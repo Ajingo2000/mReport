@@ -41,6 +41,8 @@ const menuItems = [
   { title: "Support", url: "/dashboard/support", icon: HelpCircle },
 ];
 
+
+
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { state } = useSidebar();
@@ -50,6 +52,13 @@ export function DashboardSidebar() {
   const isCollapsed = state === "collapsed";
   const isAdmin = user?.role === "admin"; // Adjust based on your User type
 
+  const customClassName = `text-xs p-1 rounded-sm  ${
+    user?.role === 'admin' || user?.org_role === 'admin'
+      ? 'bg-red-600 text-white'
+      : user?.role === 'responder' || user?.org_role === 'responder'
+      ? 'bg-blue-600 text-white'
+      : 'bg-gray-200 text-gray-800'
+  }`;
 
   const isActive = (path: string) => {
     if (path === "/dashboard") return pathname === "/dashboard";
@@ -62,25 +71,21 @@ export function DashboardSidebar() {
         {/* Logo Section */}
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex">
-            <p className="text-xl font-bold">mReport <sup className="text-xs">TM</sup></p>
+            <p className="text-xl font-bold">mReport</p>
           </div>
 
-          <div className="">
-            <span
-              className={`flex  gap-2 mt-1 px-2 py-0.5 text-sm rounded-full font-medium
-                        ${user?.role === 'admin' || user?.org_role === 'admin'
-                  ? 'bg-red-600 text-white'
-                  : user?.role === 'responder' || user?.org_role === 'responder'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-gray-200 text-gray-800'
-                }`}
+          <div className="mt-1 py-0.5 text-sm">
+            <div className="flex items-center gap-2"
+              
               title={user?.role ?? user?.org_role ?? 'Member'}
             >
               {/* Role label */}
-              {(user?.role === 'admin' || user?.org_role === 'admin') ? `Administrator - ${user?.first_name || 'Member'}`
-                : (user?.role === 'responder' || user?.org_role === 'responder') ? `Responder - ${user?.first_name || 'Member'}`
-                  : 'Member'}
-            </span>
+              {(user?.role === 'admin' || user?.org_role === 'admin') ? ( <>  <span>{user?.first_name || 'Member'}</span> ~ <span className={customClassName}> Administrator</span> </>)
+                : (user?.role === 'responder' || user?.org_role === 'responder') ?  ( <>
+                 <span>{user?.first_name || 'Member'}</span> ~ <span className={customClassName}>Responder </span>
+                </> )
+                  : (<span>Member</span>)}
+            </div>
           </div>
 
         </div>
